@@ -260,10 +260,16 @@ describe("old and new watchers during an upgrade: exactly one owns a seat", { ti
       writeFileSync(path.join(dir, ...name.split("/")), installedText(name));
     }
     oldWake = path.join(dir, "opencadre-wake.mjs");
-    writeFileSync(oldWake, installTransform(execFileSync("git", ["show", `${OLD_REF}:scripts/opencadre-wake.mjs`], { encoding: "utf8" })));
+    // The old commit is not in this repository, so the two tests that need the old watcher are skipped below.
+    try {
+      writeFileSync(oldWake, installTransform(execFileSync("git", ["show", `${OLD_REF}:scripts/opencadre-wake.mjs`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })));
+    } catch {
+      // no old watcher available
+    }
   });
 
-  it("an old watcher owns the seat: new ones arriving leave at once, the lock is untouched, and only the old one wakes", async () => {
+  // PUBLIC-SNAPSHOT SKIP: needs the watcher as it was at an old commit of the private pre-release history. See CONTRIBUTING.md, "Skipped tests".
+  it.skip("an old watcher owns the seat: new ones arriving leave at once, the lock is untouched, and only the old one wakes", async () => {
     const { orgId, peer, env, lockPath } = setup("Overlap Old Owns Org");
     const old = startWatcher(env, oldWake);
     await waitFor(() => lockTaken(lockPath), "the old watcher to take its lock");
@@ -278,7 +284,8 @@ describe("old and new watchers during an upgrade: exactly one owns a seat", { ti
     expect(woke.err).toContain("one wake from the old one");
   });
 
-  it("a new watcher owns the seat: old ones arriving leave at once, the lock is untouched, and only the new one wakes", async () => {
+  // PUBLIC-SNAPSHOT SKIP: needs the watcher as it was at an old commit of the private pre-release history. See CONTRIBUTING.md, "Skipped tests".
+  it.skip("a new watcher owns the seat: old ones arriving leave at once, the lock is untouched, and only the new one wakes", async () => {
     const { orgId, peer, env, lockPath } = setup("Overlap New Owns Org");
     const fresh = startWatcher(env);
     await waitFor(() => lockTaken(lockPath), "the new watcher to take its lock");
