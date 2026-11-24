@@ -1,0 +1,99 @@
+/* OpenCadre colour PRIMITIVES: "Carbon, chalk, one chip" (UX audit 2026-09-29, s4.1 and the s4.2 status table).
+
+   What this file is: the raw palette, and nothing else. Both surfaces load it FIRST, before their own stylesheet: the
+   console (public/app/index.html, then app.css, then console-v2.css) and every site page (public/site/*.html, then
+   site.css). One declaration per value, so the site and the console cannot drift apart again.
+
+   What it must never contain:
+   - ROLES (--bg, --surface, --ink, --line, status roles ...). Those live in each surface's own file, as var()
+     references to these primitives: public/app/app.css (:root and its dark block) and public/site/site.css (:root).
+   - Component values (radius, shadow, type, spacing).
+   - A prefers-color-scheme block. These values are THEME-INVARIANT: light and dark are separate names (-l / -d) and
+     the console's dark block picks the -d ones. The site is light-only, so a dark override here would darken it for
+     every visitor whose OS is dark.
+   - A name that a surface file also declares: two declarations of one name means source order decides and a reader
+     cannot tell which applies (#540).
+   tests/console-token-source.test.ts holds these rules. docs/superpowers/plans/2026-09-29-design-tokens.md s2a is
+   the ruling. */
+:root {
+  /* Neutrals: one scale for both themes, tinted toward chalk rather than pure grey, so the UI and the mark share one
+     temperature. Contrast notes are the audit's. */
+  --n-0: #FFFFFF;
+  --n-50: #F6F6F3;   /* chalk */
+  --n-100: #EEEEEA;
+  --n-150: #E6E6E1;
+  --n-200: #DDDDD8;  /* the brand board's line */
+  --n-300: #C9C9C3;
+  --n-350: #B8BAC0;  /* the audit's dark --text-2 (8.7:1), named so every role maps to a neutral (plan s7) */
+  --n-400: #8B8E96;  /* control border: 3.28:1 on white */
+  --n-450: #8E9199;  /* the audit's dark --text-3 (5.3:1) and dark neutral status text */
+  --n-500: #6C707A;  /* slate: 4.96:1 on white, 4.58:1 on chalk */
+  --n-700: #44474D;
+  --n-800: #2E3036;
+  --n-850: #24252B;
+  --n-900: #1C1D22;
+  --n-950: #15161A;  /* carbon */
+  --n-1000: #0F1013;
+
+  /* The Signal cyan is the chip ONLY: the small square in the mark, used in .brand-chip rules. Never a focus ring, a
+     selection, a status or a wash (7.56:1 on carbon, 2.21:1 on chalk: fine for a logo, not for UI). There is no
+     --accent: the brand is mono. */
+  --chip: #16B8CE;
+
+  /* Status: each has a TEXT value (words; contrast on its own surface per the audit), a SOLID one (dots, bars) and a
+     WASH (backgrounds), for light (-l) and dark (-d). Always paired with a word, never colour alone. There is no
+     blue: online is green. The ok text values equal the console's --state-online (public/app/tokens.css), light and
+     dark. */
+  /* online / done / approved */
+  --ok-text-l: #18794E;      /* 5.4:1 */
+  --ok-text-d: #4CC38A;      /* 7.6:1 */
+  --ok-solid-l: #22A06B;
+  --ok-solid-d: #3DB67B;
+  --ok-wash-l: #E9F6EF;
+  --ok-wash-d: #13261C;
+  /* waiting / needs you */
+  --wait-text-l: #A35200;    /* 5.6:1 */
+  --wait-text-d: #F0A83A;    /* 8.3:1 */
+  --wait-solid-l: #E5940C;
+  --wait-solid-d: #E5A23A;
+  --wait-wash-l: #FDF3E1;
+  --wait-wash-d: #2A2112;
+  /* denied / danger / failed */
+  --danger-text-l: #C62A2F;  /* 5.6:1 */
+  --danger-text-d: #FF6B6B;  /* 6.1:1 */
+  --danger-solid-l: #D93A3F;
+  --danger-solid-d: #F06064;
+  --danger-wash-l: #FCEBEB;
+  --danger-wash-d: #2C1618;
+  /* offline / idle / expired. Four of these ARE neutral-scale values in the audit, so they reference the scale
+     rather than repeat its hex: retuning a neutral must not leave the neutral status behind. The two solids are not
+     on the scale and stay literal. */
+  --neutral-text-l: var(--n-500);
+  --neutral-text-d: var(--n-450);
+  --neutral-solid-l: #A4A6AB;
+  --neutral-solid-d: #5E6168;
+  --neutral-wash-l: var(--n-100);
+  --neutral-wash-d: var(--n-850);
+
+  /* Data-viz categorical: the identity of a data SERIES in a chart, and nothing else (never a status, the brand or a
+     vendor). Three slots, always in this order, never cycled; a fourth series folds into "Other" on the neutral scale.
+     The hues sit away from every status hue and from the chip. Validated in B:\ai-work\temp\9d1f-design\direction.md
+     s2.4 (all pairs, protan/deutan/tritan): worst CVD dE 9.2 light / 9.8 dark; mark contrast 3.19:1 or better on
+     chalk and white, 3.39:1 on --n-900. That is enough for marks, not for small text: labels use the text roles. */
+  --viz-1-l: #006AC5;  /* blue */
+  --viz-1-d: #2896F5;
+  --viz-2-l: #B55D92;  /* magenta */
+  --viz-2-d: #BC6398;
+  --viz-3-l: #8F78EE;  /* violet */
+  --viz-3-d: #765DCF;
+
+  /* Vendors: identity stripes and avatars only, read by site.css (--claude ...; the site has no grok); prefixed so that
+     no surface file declares the same name. The console shows a tool by its monochrome logo instead (vendorLogo in
+     public/app/app.js); it reads only --vendor-gemini and --vendor-other, for two non-vendor borders (audit s4.2). */
+  --vendor-claude: #d97757;
+  --vendor-codex: #10a37f;
+  --vendor-cursor: #525252;
+  --vendor-gemini: #4f7df3;
+  --vendor-grok: #8a8f98;
+  --vendor-other: #8b5cf6;
+}

@@ -1,0 +1,1734 @@
+@import url("./tokens.css");
+
+/* ONE DECLARATION PER TOKEN (docs/design/CONSOLE-V2.md §4.2). The console's roles, type and spacing are declared in
+   THIS file's :root and its dark block: the contrast tests read them here. /shared/tokens.css, linked before this
+   file by index.html (never @imported here), holds only the colour primitives both surfaces share (--n-*, --chip,
+   status and vendor values); ./tokens.css adds only the agent-state tokens (--state-*), and console-v2.css only
+   layout measures (--row-*, --*-radius).
+   The console once loaded an older /shared/tokens.css twice (a <link> and an @import) and redeclared 37 of its 51
+   values, so source order decided which applied and a reader could not tell. No name is now declared both in the
+   shared file and here; tests/console-token-source.test.ts keeps it that way. */
+
+/* OpenCadre console. Modern flight-strip board:
+   Airy neutral canvas, mono carbon and chalk (the brand has no accent colour), crisp surfaces, and Geist typography
+   aligned with the OpenCadre design system (open-design.ai reference). */
+:root {
+  --r: 14px;
+  --r-sm: 8px;
+  /* Colour roles reference the shared primitives in /shared/tokens.css (design-token plan s8/s9); this block takes
+     the -l status values, the dark block below the -d ones. A role the dark block does not override is fixed. */
+  --red: var(--danger-solid-l);
+  --bg: var(--n-50);
+  --surface: var(--n-0);
+  /* n-50, not n-100: --muted on n-100 is 4.26:1, under AA; on n-50 it is 4.58:1 (plan s9). */
+  --surface-2: var(--n-50);
+  --surface-3: var(--n-100);
+  --ink: var(--n-950);
+  --ink-2: var(--n-700);
+  --muted: var(--n-500);
+  --line: var(--n-200);
+  --line-strong: var(--n-300);
+  /* The empty part of a plan-limit gauge (console dashboard phase 1). Its fills are --ink, --amber-ink and --halt-text,
+     each at 3:1 or better against it (tests/design-tokens.test.ts). */
+  --chart-track: var(--n-150);
+  --hairline: 0 0 0 1px var(--line);
+  --specular: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  /* A fixed dark fill for solid "ink" UI (.btn-ink, .toast): white text sits on top of it, so it
+     must never flip light in dark mode the way --ink (body text) does -- caught by screenshotting
+     Connect's "Add a computer" button in dark mode, which otherwise renders white-on-white. */
+  --ink-solid: var(--n-950);
+  /* Its hover step, and the light drawn on it and on every other solid fill (--halt, the *-contrast badges, the
+     hold fills, the code slabs). Both fixed across themes for the same reason as --ink-solid: these fills do not
+     flip, so neither may what sits on them. White rather than chalk: white on --halt is 4.54:1, chalk falls under AA. */
+  --ink-solid-hover: var(--n-850);
+  --on-solid: var(--n-0);
+  --focus-glow: rgba(23, 23, 23, 0.08);
+
+  /* Neutral chip/pill tints. These were five literal rgba(23,23,23,a) backgrounds, which DARKEN
+     whatever is under them -- correct on a near-white surface, invisible on a dark one, so every
+     chip lost its pill shape in dark mode while its text stayed legible. Same defect class as the
+     priority-1 strip (#181), and the same remedy --focus-glow already uses two lines up: one token
+     per alpha step, flipped to a light tint in the dark block. Light values are unchanged. */
+  --chip-tint-1: rgba(23, 23, 23, 0.04);
+  --chip-tint-2: rgba(23, 23, 23, 0.06);
+  --chip-tint-3: rgba(23, 23, 23, 0.08);
+  --chip-tint-4: rgba(23, 23, 23, 0.1);
+
+  /* The palette is mono: selection, focus and "active" read in --ink, never a colour.
+     --chip, the Signal cyan, is declared once in /shared/tokens.css and belongs to the chip ONLY (the square in the
+     mark): never focus, selection, status or a wash. The old mint --accent family is gone; success/connected states
+     use the status green below. */
+  /* Status green as a wash + ink pair (cleared, connected, success), beside the fixed --clear below. */
+  --clear-tint: var(--ok-wash-l);
+  --clear-ink: var(--ok-text-l);
+  --amber: var(--wait-solid-l);
+  --amber-wash: var(--wait-wash-l);
+  --amber-tint: var(--wait-wash-l);
+  --amber-ink: var(--wait-text-l);
+  /* --clear is the green FILL (dots, bars, the hold fill, borders): 3.3:1 on white, so text in green is --clear-ink,
+     as danger text is --halt-text below. */
+  --clear: var(--ok-solid-l);
+  /* --halt is the danger FILL (buttons, bars, stripes, borders), fixed across themes. Danger TEXT is --halt-text,
+     with its own dark value: the solid reads 3.94:1 on its light wash and 3.75:1 on the dark one (plan s9). */
+  --halt: var(--danger-solid-l);
+  --halt-text: var(--danger-text-l);
+  --halt-wash: var(--danger-wash-l);
+  /* Darker than --amber/--halt, for white text on a fill at the small bold sizes badges use. White on --amber is
+     2.45:1; on --halt 4.54:1, a pass by 0.04, so the badges keep these for margin (5.58:1 and 5.57:1). Only for
+     text-on-fill badges; --amber/--halt stay as they are everywhere else (washes, borders, the hold-to-approve
+     fill). Measured 2026-09-29 with the design-token primitives; the old values were ~2.0:1 and ~3.9:1. */
+  --amber-contrast: var(--wait-text-l);
+  --halt-contrast: var(--danger-text-l);
+  /* No blue status (audit s4.2): "info" is neutral. Its ink is --ink-2's neutral rather than the neutral status
+     text, which is 4.26:1 on the neutral wash (plan s9). */
+  --info-bg: var(--neutral-wash-l);
+  --info-ink: var(--n-700);
+  --risk-low-bg: var(--neutral-wash-l);
+
+  /* Aliases for console component backward compatibility */
+  --paper: var(--bg);
+  --card: var(--surface);
+  --graphite: var(--muted);
+  --rule: var(--line);
+  --danger-bg: var(--danger-wash-l);
+  --danger-ink: var(--danger-text-l);
+  --font-mono: var(--mono);
+
+  /* Vendor palette: the shared --vendor-* primitives, which the site reads too. A tool is shown by its logo now
+     (vendorLogo in app.js), not a colour; these two stay for the strip's base stripe and priority-2's border. */
+  --v-gemini: var(--vendor-gemini);
+  --v-other: var(--vendor-other);
+
+  --display: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --body: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px var(--line), 0 4px 16px -4px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 0 0 1px var(--line), 0 24px 48px -16px rgba(15, 23, 42, 0.14);
+  --gap: clamp(14px, 2.5vw, 24px); /* fluid page-level padding and top-level grid gaps */
+
+  /* Spacing scale (docs/design/CONSOLE_AUDIT.md, plan item 2): a fixed 4px-based scale for
+     component-internal spacing -- card padding, gaps inside a card, heading margins. Distinct
+     from --gap above, which stays a fluid viewport-based value for page/section-level layout.
+     This first pass applies the scale to the spacing every tab shares (card padding, panel
+     headings, empty states, the sibling-card gap in Clearances/Fleet/Settings/Tasks) rather
+     than every value in this file -- see the audit doc for what's deliberately left alone. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  /* Page-level rhythm for the redesign's larger sections (docs/design/HUB_REDESIGN.md 3.4) --
+     visibly bigger than the --gap used between cards in a row, so major sections read as distinct
+     without a rule or heading-only separation. */
+  --space-9: 48px;
+  --space-10: 64px;
+
+  /* Type scale (HUB_REDESIGN.md 3.2). One family throughout (Geist/--display, Geist Mono/--mono,
+     both from public/shared/tokens.css) -- these are size/weight/line-height only. */
+  --text-display: 700 28px/1.2 var(--display);
+  --text-h2: 700 20px/1.3 var(--display);
+  --text-h3: 600 16px/1.4 var(--display);
+  --text-body: 400 14px/1.55 var(--body);
+  --text-body-strong: 600 14px/1.55 var(--body);
+  --text-small: 400 13px/1.5 var(--body);
+  --text-micro: 700 11px/1.4 var(--display);
+  --text-metric: 700 32px/1.1 var(--display);
+  --text-mono: 400 13px/1.5 var(--mono);
+
+  /* Motion (HUB_REDESIGN.md 3.6): one easing curve, three durations by what's moving. Reduced to
+     0ms wholesale under prefers-reduced-motion, below. */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  color-scheme: light dark; /* native form controls/scrollbars follow the media query below */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-fast: 0ms; --motion-base: 0ms; --motion-slow: 0ms; }
+}
+
+/* Dark mode, Stage 1 (docs/design/CONSOLE_AUDIT.md, plan item 7): base surfaces only --
+   background, card surfaces, borders, body text. Semantic/status colors (badges, chips, vendor
+   palette) and shadows/specular highlights are deliberately untouched here -- Stage 2/3.
+   System-preference only for now (no manual toggle, no data-theme hook): this is the simpler,
+   smaller-surface-area default, and a toggle is optional future work (Stage 4). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Carbon and chalk, from the shared neutral scale (design-token plan s8). --surface-2 stays LIGHTER than
+       --surface here (a hover/raised step), not the audit's sunken n-1000. */
+    --bg: var(--n-950);
+    --surface: var(--n-900);
+    --surface-2: var(--n-850);
+    --surface-3: var(--n-800);
+    --ink: var(--n-50);
+    --ink-2: var(--n-350);
+    --muted: var(--n-450);
+    --line: var(--n-800);
+    --line-strong: var(--n-700);
+    --chart-track: var(--n-800);
+    /* A stark white inset highlight (the light-mode value) reads as a glitch on a dark surface --
+       dark UIs want this effect much subtler, almost imperceptible. */
+    --specular: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    /* The light-mode value is a dark-tinted glow, invisible on a dark input -- a focused field had
+       no visible ring at all until this was caught by actually focusing one and screenshotting it. */
+    --focus-glow: rgba(255, 255, 255, 0.12);
+
+    /* A light tint on a dark surface needs slightly more alpha than its dark-on-light counterpart
+       to read as the same step, so these are not a straight sign flip. */
+    --chip-tint-1: rgba(255, 255, 255, 0.06);
+    --chip-tint-2: rgba(255, 255, 255, 0.08);
+    --chip-tint-3: rgba(255, 255, 255, 0.10);
+    --chip-tint-4: rgba(255, 255, 255, 0.13);
+
+    /* Stage 2 (docs/design/CONSOLE_AUDIT.md, plan item 7): semantic/status colors. Each of these
+       is a near-white wash paired with a dark, saturated "ink" text color in light mode -- neither
+       half can just get darker. A wash needs its own dark, muted-but-tinted background instead of
+       a bright flash on a dark surface, and its ink needs to become a light, saturated text color
+       instead of disappearing into the new dark wash. --amber/--halt/--clear/--info themselves
+       stay the same fixed, already-vivid values in both modes (checked below) -- only the
+       near-white/near-black wash+ink *pairs* need their own dark variant. */
+    --clear-tint: var(--ok-wash-d);
+    --clear-ink: var(--ok-text-d);
+    --amber-wash: var(--wait-wash-d);
+    --amber-tint: var(--wait-wash-d);
+    --amber-ink: var(--wait-text-d);
+    --halt-text: var(--danger-text-d);
+    --halt-wash: var(--danger-wash-d);
+    --danger-bg: var(--danger-wash-d);
+    --danger-ink: var(--danger-text-d);
+    --info-bg: var(--neutral-wash-d);
+    --info-ink: var(--n-350);
+    --risk-low-bg: var(--neutral-wash-d);
+
+    /* Stage 3 (docs/design/CONSOLE_AUDIT.md, plan item 7): shadows and remaining one-offs.
+       --shadow bundles its own white inset highlight (the same "specular" effect Stage 1 fixed on
+       --specular itself, just baked directly into this token instead) -- same fix, same reason:
+       a stark white line reads as a glitch on a dark surface. The drop-shadow layers in all three
+       tokens are also a dark-navy tint (rgba(15, 23, 42, ...)), which blends into an already-dark
+       surface instead of reading as a shadow -- pure black at a higher opacity actually shows up
+       against a dark background, unlike a navy tint darker surfaces already approximate. */
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+    --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 0 0 1px var(--line), 0 4px 16px -4px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 0 0 1px var(--line), 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+[hidden] { display: none !important; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* The product lockup (an inline SVG symbol in index.html, #oc-lockup): see .oc-brand in console-v2.css. */
+.wordmark { margin: 0; display: inline-flex; align-items: center; line-height: 0; }
+.muted { color: var(--muted); }
+.error { color: var(--halt-text); margin: 0; font-weight: 600; font-size: 0.9rem; }
+.mono { font-family: var(--mono); font-size: 0.84em; font-variant-numeric: tabular-nums; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.48rem 1rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  min-height: 38px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  user-select: none;
+}
+.btn:hover {
+  background: var(--surface-2);
+  border-color: rgba(15, 23, 42, 0.25);
+}
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn-ink {
+  background: var(--ink-solid);
+  color: var(--on-solid);
+  border-color: var(--ink-solid);
+  box-shadow: 0 4px 14px -3px rgba(15, 23, 42, 0.35);
+}
+.btn-ink:hover {
+  background: var(--ink-solid-hover);
+  border-color: var(--ink-solid-hover);
+  color: var(--on-solid);
+}
+.btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+  padding-inline: 0.65rem;
+}
+.btn-quiet:hover {
+  color: var(--ink);
+  background: rgba(15, 23, 42, 0.05);
+}
+.btn-halt {
+  border-color: color-mix(in srgb, var(--halt) 28%, transparent);
+  background: var(--halt-wash);
+  color: var(--halt-text);
+}
+.btn-halt:hover {
+  background: var(--halt);
+  color: var(--on-solid);
+  border-color: var(--halt);
+  box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--halt) 30%, transparent);
+}
+
+/* Button loading state (docs/design/HUB_REDESIGN.md 4.1): a spinner replaces the label without
+   changing the button's width, so an async action's button doesn't jump when it starts working.
+   `data-label` is captured once, on the way in, so the label can be restored exactly. */
+.btn.is-loading { color: transparent; pointer-events: none; position: relative; }
+.btn.is-loading::after {
+  content: ""; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px;
+  border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent;
+  color: inherit; opacity: 0.9; animation: btn-spin 0.7s linear infinite;
+}
+.btn-ink.is-loading::after, .btn-halt:hover.is-loading::after { color: var(--on-solid); }
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .btn.is-loading::after { animation-duration: 1.4s; }
+}
+
+/* Skeleton (4.17): a shimmering placeholder shaped to approximate the content it stands in for.
+   Shown only once a fetch has been in flight for >150ms (app.js), so a fast response never flashes
+   one. `prefers-reduced-motion` freezes the shimmer instead of removing the block -- it still needs
+   to communicate "loading," just without motion. */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%; border-radius: var(--radius-sm);
+  animation: skeleton-shimmer 1.4s var(--ease-standard) infinite;
+}
+@keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--surface-2); }
+}
+.skeleton-text { height: 0.9em; margin: 0.2em 0; }
+.skeleton-text.is-short { width: 40%; }
+.skeleton-strip { height: 76px; border-radius: var(--radius); }
+
+/* Sign in */
+.signin { min-height: 100dvh; display: grid; place-items: center; padding: var(--gap); }
+.signin-card {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: clamp(24px, 5vw, 36px);
+}
+.signin-title {
+  font: 700 clamp(1.8rem, 6vw, 2.4rem)/1 var(--display);
+  letter-spacing: -0.03em;
+  margin: 0.6rem 0 0.4rem;
+}
+.stack { display: grid; gap: 14px; margin-top: 18px; }
+
+/* Sign-in: OAuth/email methods, workspace picker, invite accept */
+.signin-loading { margin: 18px 0 0; }
+.signin-methods { margin-top: 18px; }
+.btn-oauth {
+  width: 100%; justify-content: flex-start; gap: 10px;
+  padding: 0.62rem 1rem; font-size: 0.92rem;
+}
+.btn-oauth svg { flex-shrink: 0; }
+.signin-divider {
+  display: flex; align-items: center; gap: 10px; margin: 2px 0;
+  color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.signin-divider::before, .signin-divider::after { content: ""; flex: 1; height: 1px; background: var(--line-strong); }
+.signin-key-details { margin-top: 20px; }
+.signin-key-details .stack { margin-top: 14px; }
+.signin-signout-link { width: 100%; margin-top: 18px; justify-content: center; }
+/* Email sign-in, after sending: a neutral note (nothing is waiting on a person, so no amber), then Resend and
+   "Use a different email". Focused programmatically when it appears, so a screen reader starts here. */
+.callout.signin-email-sent { display: grid; gap: 10px; margin: 0; background: var(--surface-2); border-left-color: var(--ink); font-weight: 400; }
+.callout.signin-email-sent[hidden] { display: none; }
+.signin-email-sent p { margin: 0; }
+.signin-email-sent:focus:not(:focus-visible) { outline: none; }
+.signin-email-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.signin-email-actions .btn:disabled { opacity: 0.6; cursor: default; }
+#signin-email-status:empty { display: none; }
+.wizard-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.first-run-key > .btn { justify-self: start; }
+
+.workspace-list { display: grid; gap: 10px; margin-top: 18px; }
+.workspace-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: var(--specular), var(--shadow-subtle);
+  font: inherit; color: inherit;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+.workspace-item:hover { box-shadow: var(--specular), var(--shadow); transform: translateY(-1px); border-color: rgba(15, 23, 42, 0.2); }
+.workspace-item-name { font: 700 1rem/1.2 var(--display); letter-spacing: -0.01em; color: var(--ink); }
+.workspace-item-role {
+  font: 700 0.7rem/1.6 var(--display); letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--muted); background: var(--surface-2); padding: 3px 9px; border-radius: 999px;
+}
+
+/* Members card */
+.members-list, .invites-list { display: grid; gap: 8px; margin-top: 4px; }
+.invites-list:not(:empty) { margin-top: 14px; }
+.member-row, .invite-row {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 10px 14px; font-size: 0.9rem;
+}
+.member-row-name { font-weight: 700; color: var(--ink); }
+.member-row-you { color: var(--muted); font-weight: 500; font-size: 0.82rem; }
+.member-row-controls, .invite-row-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.member-row-controls select {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface); padding: 5px 8px; min-height: 34px; font-size: 0.84rem;
+}
+.invite-row-meta { color: var(--muted); font-size: 0.82rem; }
+.field { display: grid; gap: 6px; }
+.field-label {
+  font: 600 0.76rem/1 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.field-hint { font-size: 0.85rem; color: var(--muted); }
+.field input, .task-form input {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.85rem;
+  min-height: 42px;
+  width: 100%;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.field input:focus, .task-form input:focus {
+  border-color: var(--ink);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-glow);
+}
+
+/* Console chrome: app shell (docs/design/HUB_REDESIGN.md 2.1/2.2/5.4). A persistent left sidebar
+   replaces the old horizontal tab bar (which had its own now-obsolete scroll-fade CSS here --
+   removed along with it; a vertical list never needs a horizontal scroll cue). Collapses to an
+   icon rail at 1024-1279px, then to a bottom bar + slide-in drawer at <=767px. */
+.shell { display: flex; align-items: stretch; min-height: 100dvh; }
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  background: var(--surface); border-right: 1px solid var(--line);
+  position: sticky; top: 0; height: 100dvh;
+}
+.sidebar-top { padding: var(--space-4) var(--space-4) var(--space-3); display: grid; gap: var(--space-2); }
+.workspace-switcher, .project-switcher {
+  display: flex; align-items: center; gap: var(--space-2);
+  border: 0; background: none; cursor: pointer; text-align: left; width: 100%;
+  padding: var(--space-2); border-radius: var(--r-sm);
+  transition: background 120ms var(--ease-standard, ease);
+}
+.workspace-switcher:hover, .project-switcher:hover { background: var(--surface-2); }
+.workspace-switcher .wordmark { font-size: 0.98rem; }
+.sidebar-org {
+  font: 600 0.82rem/1.3 var(--display); color: var(--muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+.project-switcher { font: 600 0.84rem/1 var(--display); color: var(--ink-2); justify-content: space-between; }
+.project-switcher .nav-caret { width: 14px; height: 14px; color: var(--muted); }
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: var(--space-2) var(--space-3) var(--space-4); }
+.nav-group { display: grid; gap: 1px; margin-bottom: var(--space-4); }
+.nav-group:last-child { margin-bottom: 0; }
+.nav-group-label {
+  font: 700 0.68rem/1.4 var(--display); text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); margin: 0 0 var(--space-1) var(--space-2);
+}
+.nav-item, .bottom-bar-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  border: 0; background: none; cursor: pointer; text-align: left; width: 100%;
+  padding: var(--space-2) var(--space-3); border-radius: var(--r-sm);
+  min-height: 44px; /* a11y touch target (QA #180) -- the font-metrics-derived height alone was 34px */
+  font: 600 0.88rem/1.3 var(--display); color: var(--ink-2);
+  transition: background 120ms var(--ease-standard, ease), color 120ms var(--ease-standard, ease);
+}
+.nav-item:hover { background: var(--surface-2); color: var(--ink); }
+.nav-item[aria-current="page"] { background: var(--surface-3); color: var(--ink); }
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sidebar-bottom {
+  padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3);
+  font-size: 0.82rem;
+}
+.live { font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.live::before {
+  content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--clear); margin-right: 6px; vertical-align: 0;
+}
+.whoami { color: var(--muted); font-size: 0.82rem; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.shell-main { flex: 1; min-width: 0; }
+
+/* Icon rail: labels hide, icons center, width shrinks -- a hover/focus title (native) stands in
+   for the full Tooltip component (docs/design/HUB_REDESIGN.md 4.9), which isn't built until a
+   later stage. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .sidebar { width: 64px; }
+  .sidebar-org, .nav-group-label, .nav-label, .project-switcher, .wordmark { display: none; }
+  .workspace-switcher, .nav-item { justify-content: center; }
+  .sidebar-bottom { flex-direction: column; align-items: center; }
+  .whoami { display: none; }
+}
+
+.bottom-bar { display: none; }
+.drawer-backdrop { display: none; }
+.drawer { display: none; }
+
+@media (max-width: 767px) {
+  .shell { flex-direction: column; }
+  .sidebar { display: none; }
+  .shell-main { padding-bottom: 64px; } /* room for the fixed bottom bar */
+
+  .bottom-bar {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 25;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-bar-item {
+    flex: 1; flex-direction: column; align-items: center; gap: 2px;
+    border-radius: 0; padding: var(--space-2) var(--space-1);
+    font-size: 0.68rem; min-height: 44px; position: relative;
+  }
+  .bottom-bar-item[aria-current="page"], .bottom-bar-item[aria-expanded="true"] { background: none; color: var(--ink); font-weight: 700; }
+  .bottom-bar-item .badge { position: absolute; top: 2px; right: calc(50% - 20px); margin-left: 0; }
+
+  .drawer-backdrop:not([hidden]) {
+    display: block; position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, 0.4);
+  }
+  .drawer:not([hidden]) {
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 31;
+    width: min(280px, 82vw); background: var(--surface); box-shadow: var(--shadow-lg);
+  }
+  .drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--space-4); border-bottom: 1px solid var(--line);
+  }
+  .drawer-nav { padding: var(--space-3); display: grid; gap: 1px; overflow-y: auto; }
+}
+
+.badge {
+  display: inline-grid; place-items: center; min-width: 1.4em; height: 1.4em; padding: 0 0.4em;
+  border-radius: 999px; background: var(--amber-contrast); color: var(--on-solid); font-size: 0.72rem; font-weight: 700; margin-left: 6px;
+}
+
+/* minmax(0, 1fr): an implicit auto column grows to fit long key snippets, making the whole page scroll sideways. */
+.board { padding: var(--gap); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--gap); max-width: 1320px; margin: 0 auto; }
+.panel { display: none; }
+.panel.is-active { display: block; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-4); margin-bottom: var(--space-4); }
+.panel-head h1 {
+  font: 800 1.45rem/1.2 var(--display);
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+.panel-note { margin: 0; color: var(--muted); font-size: 0.88rem; }
+/* Trust-debt note (RBAC owner-only actions): the same quiet voice as .panel-note,
+   tightened to sit inside the strip list it closes. Tokens only -- no new literals. */
+.manage-roles-note {
+  margin: 10px 0 0; color: var(--muted); font-size: 0.88rem;
+  padding: 10px 14px; border: 1px dashed var(--line-strong); border-radius: var(--r-sm);
+}
+.manage-roles-note a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.manage-roles-note a:hover { color: var(--ink); }
+.panel-subhead {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 28px 0 10px;
+}
+.panel-subhead:first-of-type { margin-top: 8px; }
+.panel-subhead h3 {
+  font: 700 1.02rem/1.2 var(--display);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+.session-group-title {
+  font: 700 0.82rem/1 var(--display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 18px 0 8px;
+}
+.session-group-title:first-child { margin-top: 0; }
+.session-device-group { display: grid; gap: 8px; margin-bottom: 10px; }
+.session-device-label { margin: 0 0 2px; font-size: 0.82rem; color: var(--muted); }
+.rename-form { display: inline-flex; align-items: center; gap: 6px; }
+.rename-form input {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  font: inherit;
+  min-width: 160px;
+}
+.strip.is-revoked { opacity: 0.55; }
+
+/* Fleet: Computer -> Tool -> Project -> Session */
+.fleet-view-toggle { display: inline-flex; gap: 2px; padding: 3px; background: var(--surface-2); border-radius: 999px; margin-bottom: 16px; }
+.view-toggle-btn {
+  border: 0; background: none; cursor: pointer;
+  font: 600 0.84rem/1 var(--display); letter-spacing: -0.01em;
+  padding: 7px 14px; border-radius: 999px; color: var(--muted);
+  transition: background 120ms ease, color 120ms ease;
+}
+.view-toggle-btn:hover { color: var(--ink); }
+.view-toggle-btn.is-active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-subtle); }
+.fleet-groups { display: grid; gap: 16px; }
+@media (min-width: 1024px) {
+  /* docs/design/HUB_REDESIGN.md 5.5: 2-column at 1440/1024, 1-column below -- same breakpoint
+     logic as the shipped Settings is-solo/2-column fix, extended to Fleet's own cards. */
+  .fleet-groups { grid-template-columns: repeat(2, 1fr); align-items: start; }
+}
+.project-add-form { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-top: 12px; }
+.project-add-form .field { flex: 1 1 240px; margin: 0; }
+.project-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  /* padding was 18px -- off the scale, and different from .strip/.settings-card's 20px for no
+     reason: all three are the same "card" surface, just used on different tabs. */
+  box-shadow: var(--specular), var(--shadow-subtle); padding: var(--space-5);
+  display: grid; gap: var(--space-3);
+}
+.project-card.is-revoked { opacity: 0.6; }
+.project-card-title { font: 700 1.05rem/1.2 var(--display); letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+.computer-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; }
+.tool-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Removed computers that connected at least once, tucked behind a collapsed line instead of
+   cluttering the main list (docs/design/CONSOLE_AUDIT.md, "First fixes the operator spotted"). */
+.fleet-removed { grid-column: 1 / -1; margin-top: var(--space-2); }
+.fleet-removed > summary {
+  cursor: pointer;
+  font: 600 0.86rem/1 var(--display);
+  color: var(--muted);
+  padding: var(--space-2) 0;
+  list-style: none;
+}
+.fleet-removed > summary::-webkit-details-marker { display: none; }
+.fleet-removed > summary::before { content: "▸ "; }
+.fleet-removed[open] > summary::before { content: "▾ "; }
+.fleet-removed > .fleet-groups { margin-top: var(--space-2); }
+
+/* Flight strips */
+.strips { display: grid; gap: var(--gap); } /* was a hardcoded 10px -- now the same sibling-card
+  rhythm as .settings-grid and .task-columns below, instead of its own value per tab. */
+.strip {
+  --stripe: var(--v-other);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--stripe);
+  border-radius: var(--radius);
+  box-shadow: var(--specular), var(--shadow-subtle);
+  padding: var(--space-4) var(--space-5);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.strip:hover {
+  box-shadow: var(--specular), var(--shadow);
+  transform: translateY(-1px);
+}
+
+.callsign {
+  font: 700 1.15rem/1.2 var(--display);
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.vendor-tag {
+  font: 700 0.68rem/1 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 2px;
+}
+.strip-body {
+  grid-column: 1 / -1;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.state-chip {
+  align-self: center;
+  justify-self: end;
+}
+.strip-meta {
+  /* Was font-family: var(--mono) -- a monospace face buys nothing for prose like "asked just now"
+     or "seen 3m ago" (mono earns its keep on genuinely tabular/numeric text, not natural-language
+     timestamps); caught in the Implementer's release screenshots once Overview's attention cards
+     made it more visible, but the rule was shared by every strip's meta row, not just those. */
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+  font-family: var(--body); font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--muted);
+}
+/* Remove an agent: a confirm row that opens on its card, never a destructive control on every card by default.
+   Wake on mail's form opens on its card the same way. */
+.remove-confirm, .wake-form {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  padding-top: 10px; border-top: 1px solid var(--line);
+}
+.remove-warning, .wake-status, .wake-auth-status, .wake-last, .wake-note { flex-basis: 100%; margin: 0; font-size: 0.88rem; color: var(--ink-2); }
+.wake-hint { flex-basis: 100%; margin: 0; font-size: 0.8rem; color: var(--muted); }
+.wake-note[hidden], .wake-last[hidden] { display: none; }
+.wake-form label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.88rem; color: var(--ink-2); min-width: 0; }
+.wake-form input:not([type="checkbox"]) {
+  border: 1px solid var(--line-strong); background: var(--surface); border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem; font: inherit; min-width: 0; width: 16rem; max-width: 100%;
+}
+.lamp {
+  font: 600 0.8rem/1 var(--display);
+  letter-spacing: 0.02em;
+  align-self: start;
+  white-space: nowrap;
+}
+.lamp::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 6px; vertical-align: 0; background: var(--line-strong);
+}
+.lamp.on { color: var(--clear-ink); }
+.lamp.on::before {
+  background: var(--clear);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--clear) 40%, transparent);
+}
+.lamp.off { color: var(--muted); }
+
+/* Clearance request strips */
+.strip.clearance {
+  border-top-color: color-mix(in srgb, var(--amber) 25%, transparent);
+  border-right-color: color-mix(in srgb, var(--amber) 25%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--amber) 25%, transparent);
+  background: linear-gradient(90deg, var(--amber-wash), var(--surface) 55%);
+}
+.risk {
+  font: 700 0.72rem/1 var(--display);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  align-self: start;
+}
+.risk-high { background: var(--halt-contrast); color: var(--on-solid); }
+.risk-medium { background: var(--amber-contrast); color: var(--on-solid); }
+.risk-low { background: var(--risk-low-bg); color: var(--ink-2); }
+
+/* Inbox strips: a high-priority item gets the same halt/amber treatment as a high-risk clearance. */
+.strip.inbox-message-high {
+  border-top-color: color-mix(in srgb, var(--halt) 25%, transparent);
+  border-right-color: color-mix(in srgb, var(--halt) 25%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--halt) 25%, transparent);
+  background: linear-gradient(90deg, var(--danger-bg), var(--surface) 55%);
+}
+.strip.inbox-message-read { opacity: 0.7; }
+.inbox-reply-form { grid-column: 1 / -1; margin-top: 10px; display: grid; gap: 8px; }
+.inbox-reply-form textarea {
+  width: 100%; resize: vertical; font: 500 0.9rem/1.45 var(--sans, inherit);
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+}
+.inbox-reply-actions { display: flex; gap: 8px; }
+.command {
+  grid-column: 1 / -1; margin: 4px 0 0;
+  font: 500 0.88rem/1.45 var(--mono);
+  font-variant-numeric: tabular-nums;
+  background: var(--ink-solid); color: var(--on-solid);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.decide {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px;
+  padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--amber) 15%, transparent);
+}
+.grant-choice { display: grid; gap: 8px; justify-items: start; font-size: 0.86rem; color: var(--muted); margin-right: auto; }
+/* Once | 30 min | 2 h | 8 h: every choice in sight, the picked one filled. */
+.scope-seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); overflow: hidden; }
+.scope-seg-opt {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 14px;
+  font-size: 0.86rem; font-weight: 600; color: var(--ink-2); cursor: pointer; white-space: nowrap;
+}
+.scope-seg-opt + .scope-seg-opt { border-left: 1px solid var(--line-strong); }
+.scope-seg-opt input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.scope-seg-opt:has(input:checked) { background: var(--ink); color: var(--surface); }
+.scope-seg-opt:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; z-index: 1; }
+.grant-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.grant-chips[hidden] { display: none; }
+.grant-chips { align-items: center; }
+.grant-chips-lead { color: var(--ink); font-size: 0.82rem; font-weight: 600; }
+.grant-chip {
+  display: inline-flex; align-items: center; min-height: 28px; padding: 2px 10px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm); background: var(--surface-2); color: var(--ink); font-size: 0.8rem; font-weight: 600;
+}
+
+.hold {
+  position: relative; overflow: hidden;
+  border: 1.5px solid var(--clear); background: var(--surface); color: var(--clear-ink);
+  border-radius: 999px; padding: 0.5rem 1.25rem; min-height: 40px;
+  font-weight: 700; font-size: 0.88rem; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--clear) 12%, transparent);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.hold .fill {
+  position: absolute; inset: 0; background: var(--clear);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hold .label { position: relative; z-index: 1; transition: color 120ms ease; }
+.hold.is-holding {
+  transform: scale(0.985);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--clear) 30%, transparent);
+}
+.hold.is-holding .fill { transform: scaleX(1); transition: transform var(--hold-ms, 900ms) linear; }
+.hold.is-holding .label, .hold.is-done .label { color: var(--ink-solid); font-weight: 800; }
+.hold.is-done {
+  background: var(--clear);
+  border-color: var(--clear);
+}
+.hold.is-done .fill { transform: scaleX(1); }
+
+/* Halt variant: the workspace kill switch, and anywhere else holding confirms something destructive. */
+.hold.hold-halt {
+  border-color: var(--halt);
+  color: var(--halt-text);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--halt) 12%, transparent);
+}
+.hold.hold-halt .fill { background: linear-gradient(90deg, var(--halt-contrast), var(--halt)); }
+.hold.hold-halt.is-holding { box-shadow: 0 0 12px color-mix(in srgb, var(--halt) 30%, transparent); }
+.hold.hold-halt.is-holding .label, .hold.hold-halt.is-done .label { color: var(--on-solid); }
+.hold.hold-halt.is-done { background: var(--halt); border-color: var(--halt); }
+
+/* Persistent paused banner: sits between the topbar and the tabs, visible from any panel. */
+.paused-banner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  margin: 0 var(--gap); padding: 12px 18px;
+  background: var(--danger-bg); color: var(--danger-ink);
+  border: 1px solid color-mix(in srgb, var(--halt) 35%, transparent); border-radius: var(--radius);
+  box-shadow: var(--shadow-subtle);
+}
+.paused-banner-text { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 0.9rem; }
+.paused-banner-text strong { font: 700 0.95rem/1.2 var(--display); letter-spacing: -0.01em; }
+.paused-banner #resume-btn { flex-shrink: 0; }
+
+/* First-run checklist: same persistent-banner slot as .paused-banner, quieter styling. */
+.onboarding-card {
+  margin: 0 var(--gap); padding: 12px 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow-subtle);
+}
+.onboarding-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.onboarding-head strong { font: 700 0.95rem/1.2 var(--display); letter-spacing: -0.01em; }
+.onboarding-progress { font-size: 0.85rem; color: var(--muted); }
+.onboarding-hide { margin-left: auto; }
+.onboarding-steps { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.onboarding-step { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; }
+.onboarding-step-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line);
+  font-size: 0.75rem; color: var(--ink);
+}
+.onboarding-step.is-done .onboarding-step-check { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.onboarding-step.is-done .onboarding-step-label { color: var(--muted); }
+.onboarding-step:not(.is-done) .onboarding-step-label { font-weight: 600; }
+
+/* Self-serve first run: the same card slot, but each step carries a button, a command and a status
+   chip rather than a label alone -- so the steps stack instead of flowing in one row, and anything
+   wide (the command box) takes its own full-width line under its own step.
+   `min-width: 0` appears on three levels here (the step, the box, the code) for one reason: an
+   auto-width flex or grid item will not shrink below its min-content size, and the command is a
+   single unbreakable token. Without it the box inflates the LAYOUT viewport -- measured at 875px
+   inside a 375px phone -- and every `@media (max-width: ...)` rule is then evaluated against that
+   wider width, so the mobile layout that would have wrapped the command never applies. Each level
+   shrinks to its container and the code scrolls inside its own box instead. */
+/* It sits directly under the panel head rather than in the banner slot below the overview sections:
+   a stranger's single next action belongs above "Needs your attention", and .overview-section only
+   spaces itself off a sibling SECTION -- so the gap the following section would have had comes from
+   here. */
+.first-run-card { margin-bottom: var(--space-8); }
+.first-run-steps { display: grid; gap: 10px; }
+.first-run-steps .onboarding-step { flex-wrap: wrap; align-items: flex-start; gap: 6px 8px; min-width: 0; }
+.first-run-steps .onboarding-step-check { flex: none; margin-top: 1px; }
+.first-run-steps .onboarding-step-label { flex: 1 1 auto; min-width: 0; }
+.first-run-cmd { flex: 1 1 100%; min-width: 0; margin: 6px 0 0; }
+.first-run-steps .status-chip { flex: 1 1 100%; }
+.first-run-key { display: grid; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line-strong); }
+.first-run-key-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.first-run-key-head strong { font: 700 0.88rem/1.2 var(--display); letter-spacing: -0.01em; }
+.first-run-key-note { margin: 0; font-size: 0.82rem; color: var(--muted); }
+.first-run-key-value {
+  margin: 0; padding: 10px 14px; min-width: 0; max-width: 100%; overflow-x: auto;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  font-family: var(--mono); font-size: 0.82rem; color: var(--ink); user-select: all;
+}
+
+/* Settings: clearance policy + kill switch cards */
+.settings-card-wide { grid-column: 1 / -1; }
+.policy-loading, .policy-empty { color: var(--muted); font-size: 0.88rem; padding: 4px 0; }
+.policy-list { display: grid; gap: 8px; margin-top: 4px; }
+.policy-row {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.policy-row-name { display: grid; gap: 2px; min-width: 0; }
+.policy-project { font-weight: 700; color: var(--ink); font-size: 0.92rem; overflow-wrap: anywhere; }
+.policy-meta { font-size: 0.78rem; color: var(--muted); }
+.policy-row-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.policy-row-controls select {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface); padding: 6px 10px; min-height: 36px; font-size: 0.85rem;
+}
+.policy-add-form {
+  display: flex; align-items: flex-end; gap: var(--space-3); flex-wrap: wrap;
+  margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px dashed var(--line-strong);
+}
+.policy-add-form .field { flex: 1 1 200px; min-width: 0; }
+.policy-add-form select {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface); padding: 0.5rem 0.7rem; min-height: 38px; font-size: 0.9rem; width: 100%;
+}
+.killswitch-card { border-color: color-mix(in srgb, var(--halt) 25%, transparent); }
+.killswitch-status { margin: 0; font-size: 0.92rem; color: var(--ink-2); }
+.killswitch-status strong { color: var(--ink); }
+
+/* Empty states */
+.empty {
+  border: 1px dashed var(--line-strong); border-radius: var(--radius); padding: var(--space-7) var(--space-6);
+  color: var(--muted); background: var(--surface-2); text-align: center;
+  font-size: 0.92rem; line-height: 1.5;
+}
+.empty strong {
+  display: block; color: var(--ink); font: 700 1.1rem/1.2 var(--display);
+  letter-spacing: -0.015em; margin-bottom: var(--space-2);
+}
+.empty-first-visit {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  padding: var(--space-8) var(--space-6);
+}
+.empty-first-visit strong {
+  font-size: 1.2rem;
+  margin-bottom: var(--space-2);
+}
+.empty-actions {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+/* A small `.empty` card is right at home next to real content (a task column with cards beside
+   it), but as the *entire* content of a panel it reads as a stray leftover pinned at the top of an
+   otherwise blank page (docs/design/CONSOLE_AUDIT.md, finding #6) -- Timeline with no events, or
+   Inbox failing to load. `.empty-page` gives that specific case real height and centers its own
+   text in it, so the empty state itself anchors the space instead of floating in it. */
+.empty-page {
+  min-height: min(46vh, 360px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* History and grants */
+.history-list { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+.history-list li {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 0.86rem;
+  border-bottom: 1px solid var(--line); padding: 8px 0;
+}
+.outcome {
+  font: 700 0.7rem/1.6 var(--display);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+}
+.outcome-approved { color: var(--clear-ink); background: color-mix(in srgb, var(--clear) 10%, transparent); }
+.outcome-denied, .outcome-expired { color: var(--halt-text); background: color-mix(in srgb, var(--halt) 10%, transparent); }
+.outcome-noted, .outcome-withdrawn { color: var(--muted); background: rgba(15, 23, 42, 0.06); }
+.grants { display: grid; gap: 8px; margin-top: 10px; }
+.grant-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 0.86rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 14px;
+  box-shadow: var(--shadow-subtle);
+}
+
+/* Tasks */
+.task-form { display: flex; gap: var(--space-3); margin-bottom: var(--space-5); }
+/* Without this the input's width: 100% (.field input, .task-form input above) wins the
+   flex-shrink fight and the button gives up space instead, wrapping "Add task" in two. */
+.task-form .btn { flex-shrink: 0; white-space: nowrap; }
+.task-columns { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.column {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.column h3 {
+  font: 700 0.92rem/1 var(--display);
+  letter-spacing: 0.02em; color: var(--muted); text-transform: uppercase;
+  margin: 0 0 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.task {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  box-shadow: var(--specular), var(--shadow-subtle); padding: 12px 14px; margin-bottom: 10px;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.task:hover {
+  box-shadow: var(--specular), var(--shadow);
+  transform: translateY(-1px);
+}
+.task-title { margin: 0 0 6px; font-weight: 600; font-size: 0.92rem; color: var(--ink); overflow-wrap: anywhere; }
+.task-meta { font-family: var(--mono); font-size: 0.76rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.task.stale { border: 1.5px dashed var(--amber); background: var(--amber-wash); }
+/* A done-but-unreviewed task (src/tasks.ts: reviewed = 0) needs a distinct agent's accept_task/reject_task before
+ * it's confirmed. Ink, dashed (not amber, already used for stale claims) so the two "needs attention" states read as
+ * different kinds of attention at a glance. */
+.task.unreviewed { border: 1.5px dashed var(--ink-2); background: var(--surface-2); }
+
+/* Connect */
+.connect-form { max-width: 480px; }
+.name-row { display: flex; gap: 8px; }
+.name-row input { flex: 1; min-width: 0; }
+.connect-output { margin-top: 18px; }
+.callout {
+  background: var(--amber-wash); border-left: 4px solid var(--amber);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin: 0 0 14px; font-weight: 600;
+}
+.snippets { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.snippet {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--specular), var(--shadow-subtle); padding: 12px 14px;
+}
+.snippet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.snippet-head h3 { margin: 0; font: 700 0.95rem/1 var(--display); letter-spacing: -0.01em; }
+.snippet pre {
+  margin: 0; font: 0.8rem/1.45 var(--mono);
+  background: var(--ink-solid); color: var(--on-solid); border-radius: var(--radius-sm); padding: 12px;
+  overflow-x: auto; white-space: pre; border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: var(--ink-solid); color: var(--on-solid); padding: 10px 18px; border-radius: 999px;
+  font-weight: 600; font-size: 0.9rem; box-shadow: 0 8px 24px -4px rgba(23, 23, 23, 0.3);
+  max-width: calc(100vw - 32px); z-index: 10;
+}
+
+/* Timeline & Awareness */
+.timeline-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.filter-field { min-width: 200px; }
+.filter-field select {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.85rem;
+  min-height: 42px;
+  width: 100%;
+}
+.timeline-feed, .awareness-feed { display: grid; gap: 10px; }
+.timeline-pagination { margin-top: 16px; text-align: center; }
+
+/* Live connection indicator */
+.live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  display: inline-block;
+}
+.live-dot.is-live {
+  background: var(--clear);
+  box-shadow: 0 0 0 2px var(--clear-tint);
+  animation: pulse-live 2s infinite ease-in-out;
+}
+.live-dot.is-polling {
+  background: var(--amber);
+}
+@keyframes pulse-live {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+}
+
+/* Timeline Vertical Rail */
+.timeline-feed {
+  position: relative;
+  display: grid;
+  gap: 12px;
+}
+.timeline-feed::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.strip.timeline-entry {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 24px auto 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  padding-left: 10px;
+}
+
+.rail-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  justify-self: center;
+  background: var(--muted);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.rail-dot.dot-ink {
+  background: var(--ink-2);
+  box-shadow: 0 0 0 2px var(--surface-3);
+}
+.rail-dot.dot-green {
+  background: var(--state-online);
+  box-shadow: 0 0 0 2px var(--clear-tint);
+}
+.rail-dot.dot-amber {
+  background: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-tint);
+}
+.rail-dot.dot-red {
+  background: var(--red);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 20%, transparent);
+}
+.rail-dot.dot-muted {
+  background: var(--muted);
+}
+
+.seq-tag {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.type-tag {
+  font: 700 0.72rem/1 var(--display);
+  letter-spacing: 0.02em;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--chip-tint-2);
+  color: var(--ink-2);
+  margin-right: 6px;
+}
+.timeline-summary {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.timeline-detail {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* 4-step delivery tracker */
+.delivery-tracker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: var(--chip-tint-1);
+  border-radius: 999px;
+}
+.d-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+.d-dot.d-active {
+  background: var(--ink);
+}
+.d-dot.d-acked {
+  background: var(--clear);
+}
+.d-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.strip.event-conflict { border-left-color: var(--amber); }
+.strip.event-decision { border-left-color: var(--ink); }
+.strip.event-approval { border-left-color: var(--clear); }
+.strip.event-bypass {
+  border-left-color: var(--halt);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--halt) 6%, transparent), var(--surface) 55%);
+}
+
+/* Awareness Panel (Stacked Sections) */
+.awareness-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.awareness-section {
+  margin-bottom: 20px;
+}
+.awareness-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.awareness-section-title {
+  font: 700 0.88rem/1.2 var(--display);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.pill-chip {
+  font: 700 0.72rem/1 var(--mono);
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--chip-tint-3);
+  color: var(--ink-2);
+}
+.pill-chip.pill-p1 {
+  background: var(--amber-contrast);
+  color: var(--on-solid);
+}
+.pill-chip.pill-p2 {
+  background: var(--chip-tint-4);
+  color: var(--ink);
+}
+.all-clear-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--clear-tint);
+  color: var(--clear-ink);
+  border: 1px solid var(--clear);
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin: 12px 0;
+}
+.all-clear-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--clear);
+}
+.bg-pill {
+  font: 600 0.76rem/1.2 var(--display);
+  letter-spacing: -0.01em;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  color: var(--ink-2);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.strip.priority-1 {
+  border-left-color: var(--amber);
+  background: linear-gradient(90deg, var(--amber-wash), var(--surface) 40%);
+}
+.strip.priority-2 { border-left-color: var(--v-gemini); }
+.p-badge {
+  font: 700 0.72rem/1 var(--display);
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.p-badge.p1 { background: var(--amber-contrast); color: var(--on-solid); }
+.p-badge.p2 { background: var(--chip-tint-3); color: var(--ink); }
+
+.ack-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.is-acked {
+  opacity: 0.45;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2);
+}
+.btn-ghost:hover {
+  background: var(--surface-2);
+}
+.btn-sm {
+  min-height: 32px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Task Controls */
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.task-actions .btn-sm {
+  font-size: 0.74rem;
+  padding: 2px 8px;
+  min-height: 26px;
+}
+
+/* Connect Flow */
+.connect-flow {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  padding: 20px;
+  box-shadow: var(--specular), var(--shadow-subtle);
+  margin-bottom: 24px;
+}
+.connect-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.connect-cmd-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ink-solid);
+  color: var(--on-solid);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  gap: 12px;
+  overflow-x: auto;
+}
+/* The panel above is a hard-coded near-black, picked against the light card it sits on. In dark mode
+   the card IS near-black, so the two differ by one hex step -- #171717 against --surface #16181c --
+   and the one thing the user has to copy loses its container and reads as loose text on the card.
+   Measured from the tokens, not judged from a screenshot: a scaled-down capture makes a one-step
+   difference look like no difference at all, in both directions. Sink the panel below the card and
+   let a border hold the edge the fill no longer provides. Applies to the Connect page and the
+   self-serve first-run card alike, which is why it lives here rather than on either one. */
+@media (prefers-color-scheme: dark) {
+  .connect-cmd-box { background: var(--bg); border: 1px solid var(--line-strong); }
+}
+.connect-cmd {
+  white-space: nowrap;
+  /* A flex item's default min-width is its min-content size, and this one is a single unbreakable
+     command -- so without min-width:0 a command longer than the viewport widens the whole layout
+     instead of scrolling inside its box (the box's own overflow-x never gets a chance to act). */
+  min-width: 0;
+  overflow-x: auto;
+}
+.connect-agent-prompt {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+.connect-agent-prompt .connect-cmd-box {
+  align-items: flex-start;
+}
+.connect-agent-prompt .connect-cmd {
+  white-space: pre-wrap;
+  overflow-x: visible;
+  line-height: 1.5;
+}
+.connect-timer {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.connect-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.status-chip {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+/* Fleet usage chip: neutral here, amber via chip-waiting (declared after, so it wins), red via chip-limited. */
+.status-chip.usage-chip {
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+.status-chip.chip-limited {
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+}
+.status-chip.chip-waiting {
+  background: var(--amber-tint);
+  color: var(--amber-ink);
+}
+.status-chip.chip-redeemed {
+  background: var(--info-bg);
+  color: var(--info-ink);
+}
+.status-chip.chip-online {
+  background: var(--clear-tint);
+  color: var(--clear-ink);
+}
+.advanced-connect {
+  margin-top: 16px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+.advanced-connect summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+/* Settings panel */
+.settings-grid {
+  display: grid;
+  /* was a hardcoded 18px; the same fluid rhythm as .strips and .task-columns now, not a third value. */
+  gap: var(--gap);
+  /* Fixed at 2 columns, not repeat(auto-fit, minmax(320px, 1fr)): auto-fit renders 2, 3 or more
+     tracks depending on viewport width (measured 3 tracks at exactly 1280px, the audit's own
+     reference width), which made layoutSettingsGrid()'s `narrow.length % 2` check wrong in
+     general -- caught in review (docs/design/CONSOLE_AUDIT.md, finding #5). A fixed 2-up layout
+     keeps that check correct by construction and still collapses to 1 column on mobile below. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+/* Set by layoutSettingsGrid() in app.js when an odd number of narrow cards would otherwise strand
+   the last one alone in its row (docs/design/CONSOLE_AUDIT.md, finding #5) -- e.g. "Webhook
+   notifications" with no "Phone notifications" beside it. Spans the whole row instead of leaving
+   the other half blank. */
+.settings-card.is-solo { grid-column: 1 / -1; }
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--specular), var(--shadow-subtle);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.settings-card h3 {
+  font: 700 1.05rem/1.2 var(--display);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+.settings-fields {
+  display: grid;
+  gap: 14px;
+}
+.settings-val {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.copyable-val {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.settings-code {
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-2);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  word-break: break-all;
+  border: 1px solid var(--line);
+}
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.stat-box {
+  background: var(--surface-2);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--line);
+}
+.stat-number {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.stat-online {
+  color: var(--clear-ink);
+}
+.stat-label {
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+.status-msg {
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+.status-msg.status-success {
+  background: var(--clear-tint);
+  color: var(--clear-ink);
+}
+.status-msg.status-error {
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+}
+
+/* Phone notifications (Settings) */
+.push-devices { margin-top: 14px; }
+.push-devices-list { display: grid; gap: 8px; margin-bottom: 10px; }
+.push-device-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 8px 12px; background: var(--surface-2); border-radius: var(--radius-sm);
+  font-size: 0.85rem; color: var(--ink-2);
+}
+.push-device-row-failing { background: var(--danger-bg); color: var(--danger-ink); }
+.push-device-meta { overflow-wrap: anywhere; }
+
+/* Focused approval: a phone notification's deep link opens straight to this instead of the console. */
+.focused-approval-overlay {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--gap);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+}
+.focused-approval-card {
+  position: relative;
+  width: min(480px, 100%);
+  max-height: calc(100dvh - 2 * var(--gap));
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--stripe, var(--ink));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: clamp(20px, 5vw, 32px);
+  display: grid;
+  gap: 10px;
+}
+.focused-approval-card h2 { margin: 4px 0 0; font: 700 1.3rem/1.3 var(--display); letter-spacing: -0.01em; }
+.focused-approval-close { justify-self: end; }
+.focused-approval-decide {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--line);
+}
+.focused-approval-decide .hold { flex: 1 1 auto; min-width: 180px; }
+
+@media (max-width: 640px) {
+  .whoami { display: none; }
+  /* The wordmark must never be the thing that gets clipped: at this width the fleet-count text
+     ("N of M online", already shown in Fleet itself) is the least essential of the topbar-meta
+     items, so it's what gives way first. */
+  #fleet-count { display: none; }
+  .board { padding: 12px; gap: 14px; }
+  .panel-head { margin-bottom: 12px; }
+  .panel-head h1 { font-size: 1.25rem; }
+  .strip { padding: 12px 14px; gap: 6px 10px; }
+  .callsign { font-size: 1.05rem; }
+  .command { font-size: 0.82rem; padding: 10px 12px; }
+  .connect-inputs { grid-template-columns: 1fr; }
+  .connect-flow { padding: 16px; }
+  .connect-cmd-box { flex-direction: column; align-items: stretch; gap: 8px; }
+  .connect-cmd { font-size: 0.8rem; }
+  .task-form { flex-direction: column; }
+  .task-columns { grid-template-columns: 1fr; gap: 14px; }
+  .grant-choice { margin-right: 0; width: 100%; }
+  .scope-seg { display: flex; width: 100%; }
+  .scope-seg-opt { flex: 1 1 0; padding: 0 8px; }
+  .decide { flex-direction: column; align-items: stretch; gap: 8px; }
+  .decide .btn, .decide .hold { width: 100%; flex: none; }
+  .settings-grid { grid-template-columns: 1fr; gap: 14px; }
+  .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-box { padding: 10px; }
+  .stat-number { font-size: 1.35rem; }
+  .timeline-feed::before { left: 14px; }
+  .strip.timeline-entry {
+    grid-template-columns: 18px 1fr;
+    gap: 6px 10px;
+    padding-left: 6px;
+    align-items: start;
+  }
+  .strip.timeline-entry .rail-dot {
+    grid-column: 1;
+    grid-row: 1;
+    margin-top: 4px;
+  }
+  .strip.timeline-entry > div:nth-of-type(1) {
+    grid-column: 2;
+  }
+  .strip.timeline-entry > div:nth-of-type(2) {
+    grid-column: 2;
+  }
+  .strip.timeline-entry .strip-meta {
+    grid-column: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .empty { padding: 28px 16px; font-size: 0.88rem; }
+  .paused-banner { margin: 0 12px; padding: 10px 14px; flex-direction: column; align-items: stretch; }
+  .paused-banner #resume-btn { width: 100%; }
+  .policy-row { flex-direction: column; align-items: stretch; }
+  .policy-row-controls { flex-direction: column; align-items: stretch; }
+  .policy-row-controls select, .policy-row-controls .btn { width: 100%; }
+  .policy-add-form { flex-direction: column; align-items: stretch; }
+  /* .field's flex: 1 1 200px (desktop) sets flex-basis on the main axis, which
+     flex-direction: column just flipped from width to height -- without this
+     reset every stacked field is forced 200px tall, label pinned to the top
+     and its input pinned to the bottom of that box. */
+  .policy-add-form .field { flex: none; }
+  .policy-add-form .btn { width: 100%; }
+}
+
+/* Inbox tabs (docs/design/HUB_REDESIGN.md 4.6): in-page secondary nav, underline slides to the
+   active tab -- Queue vs. History, never used for top-level navigation (that's the sidebar). */
+.inbox-tabs { display: flex; gap: var(--space-5); border-bottom: 1px solid var(--line); margin: var(--space-4) 0 var(--space-5); }
+.inbox-view-tab {
+  border: 0; background: none; cursor: pointer; padding: var(--space-2) 0; margin-bottom: -1px;
+  font: 600 0.88rem/1.3 var(--display); color: var(--muted); border-bottom: 2px solid transparent;
+}
+.inbox-view-tab:hover { color: var(--ink); }
+.inbox-view-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* Filter bar (4.5): chips for the merged queue's type filter (All/Approvals/Messages/Mentions). */
+.filter-bar { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
+.filter-chip {
+  border: 1px solid var(--line); background: var(--surface); cursor: pointer; border-radius: 999px;
+  padding: 5px 12px; font: 600 0.8rem/1.3 var(--display); color: var(--ink-2);
+  transition: background 120ms var(--ease-standard, ease), color 120ms var(--ease-standard, ease);
+}
+.filter-chip:hover { background: var(--surface-2); color: var(--ink); }
+.filter-chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: transparent; }
+
+/* Overview (docs/design/HUB_REDESIGN.md 2.3): section rhythm uses --space-8 so page sections read as
+   distinct without a rule or heading-only separation (Section 3.6). */
+.overview-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.overview-section + .overview-section,
+.overview-row + .overview-section,
+.overview-section + .overview-row { margin-top: var(--space-8); }
+.overview-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.overview-section-head h3 { margin: 0; }
+.overview-count {
+  font: var(--text-micro);
+  background: var(--surface-2);
+  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.overview-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--space-6); align-items: start; }
+.overview-fleet-summary { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.overview-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+@media (max-width: 900px) {
+  .overview-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 380px) {
+  .board { padding: 8px; }
+  .stats-row { grid-template-columns: 1fr; }
+  .live-status { font-size: 0.7rem; padding: 2px 6px; }
+  .live { font-size: 0.74rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hold.is-holding .fill { transition: none; }
+  .btn, .strip { transition: none; }
+  .live-dot.is-live { animation: none; }
+}

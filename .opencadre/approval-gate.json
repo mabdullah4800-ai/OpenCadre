@@ -1,0 +1,8 @@
+{
+  "mode": "ask",
+  "waitSeconds": 540,
+  "onTimeout": "deny",
+  "onHubUnreachable": "deny",
+  "useDefaultRules": true,
+  "useDefaultAllowlist": true
+}

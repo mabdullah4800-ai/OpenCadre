@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f6f7f8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1013" media="(prefers-color-scheme: dark)">
+  <title>OpenCadre Console</title>
+  <link rel="stylesheet" href="/shared/tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/app/app.css">
+  <link rel="stylesheet" href="/app/console-v2.css">
+  <!-- Installable PWA: iOS Web Push only fires inside an installed console. -->
+  <link rel="manifest" href="/app/manifest.webmanifest">
+  <link rel="icon" href="/shared/brand/favicon.ico" sizes="16x16 24x24 32x32">
+  <link rel="icon" href="/shared/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/shared/brand/favicon-24.svg" type="image/svg+xml" sizes="24x24">
+  <link rel="icon" href="/shared/brand/icon-24.png" type="image/png" sizes="24x24">
+  <link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="OpenCadre">
+  <script type="module" src="/app/app.js"></script>
+</head>
+<body>
+  <!-- Neutral placeholders for the mark (a rounded square) and the lockup (the plain text OpenCadre). Both take currentColor (.oc-brand in console-v2.css). -->
+  <svg class="oc-sprite" aria-hidden="true" focusable="false"><defs><symbol id="oc-mark" viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="5" fill="currentColor"/></symbol><symbol id="oc-lockup" viewBox="0 -918 6789 1116"><text x="0" y="0" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="1000" font-weight="600" textLength="6700" lengthAdjust="spacingAndGlyphs" fill="currentColor">OpenCadre</text></symbol></defs></svg>
+  <!-- Vendor logos (vendorLogo() in app.js), monochrome: each path takes the fill of the <svg> that uses it (currentColor).
+       Claude, Codex (OpenAI) and Cursor are the site hero's marks (public/site/index.html svg.node-logo, from Simple Icons,
+       CC0); Gemini is Simple Icons 16.33.0 googlegemini (CC0); Grok is @lobehub/icons-static-svg 1.95.1 grok (MIT). "other"
+       is a generic terminal glyph, not anyone's logo. -->
+  <svg class="oc-sprite" aria-hidden="true" focusable="false"><defs><symbol id="vl-claude" viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></symbol><symbol id="vl-codex" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></symbol><symbol id="vl-cursor" viewBox="0 0 24 24"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></symbol><symbol id="vl-gemini" viewBox="0 0 24 24"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></symbol><symbol id="vl-grok" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815"/></symbol><symbol id="vl-other" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5 3h14a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Zm0 1.8A1.2 1.2 0 0 0 3.8 6v12A1.2 1.2 0 0 0 5 19.2h14a1.2 1.2 0 0 0 1.2-1.2V6A1.2 1.2 0 0 0 19 4.8Z"/><path d="m6.7 9 1.3-1.3 3.8 3.8L8 15.3 6.7 14l2.5-2.5Zm5.8 5.4h5v1.8h-5Z"/></symbol></defs></svg>
+  <!-- Without JavaScript every page below stays hidden, so the console would be blank. -->
+  <noscript>
+    <section class="signin">
+      <div class="signin-card">
+        <h1 class="signin-title">Turn on JavaScript</h1>
+        <p class="muted">The OpenCadre console needs JavaScript. It doesn't work with JavaScript turned off.</p>
+      </div>
+    </section>
+  </noscript>
+  <!-- Sign in -->
+  <section id="signin" class="signin" hidden>
+    <div class="signin-card">
+      <p class="wordmark"><svg class="oc-brand oc-lockup" width="146" height="24" role="img" aria-label="OpenCadre"><use href="#oc-lockup"/></svg></p>
+      <div class="ui-vignette" aria-hidden="true"><span></span><span></span><span></span></div>
+        <h1 class="signin-title" id="signin-title">Sign in</h1>
+        <p class="muted" id="signin-lede"></p>
+
+      <div id="signin-methods" class="stack signin-methods">
+        <p id="signin-methods-loading" class="muted signin-loading">Checking sign-in options…</p>
+        <div id="signin-oauth" class="stack" hidden>
+          <button class="btn btn-oauth" id="signin-github" type="button" hidden>
+            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            Continue with GitHub
+          </button>
+          <button class="btn btn-oauth" id="signin-google" type="button" hidden>
+            <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.58-2.58A8.98 8.98 0 0 0 9 0 9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58Z"/></svg>
+            Continue with Google
+          </button>
+        </div>
+        <div id="signin-divider" class="signin-divider" hidden><span>or</span></div>
+        <form id="signin-email-form" class="stack" hidden>
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input id="signin-email" type="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="signin-email-hint">
+            <span class="field-hint" id="signin-email-hint">Open the link in this same browser.</span>
+          </label>
+          <button class="btn btn-ink" id="signin-email-submit" type="submit">Email me a sign-in link</button>
+        </form>
+        <!-- After sending: the address used, a resend that waits out a short cooldown, and a way back to fix the address. -->
+        <div id="signin-email-sent" class="callout signin-email-sent" tabindex="-1" hidden>
+          <p>We sent a sign-in link to <strong id="signin-email-sent-addr"></strong>. Open it in this same browser; it works once.</p>
+          <div class="signin-email-actions">
+            <button class="btn btn-quiet btn-sm" id="signin-email-resend" type="button">Resend</button>
+            <button class="btn btn-quiet btn-sm" id="signin-email-change" type="button">Use a different email</button>
+          </div>
+          <p class="field-hint" id="signin-email-status" role="status" aria-live="polite"></p>
+        </div>
+        <p id="signin-error" class="error" role="alert" hidden></p>
+      </div>
+
+      <details class="advanced-connect signin-key-details">
+        <summary>Sign in with an agent key instead</summary>
+        <form id="signin-key-form" class="stack">
+          <label class="field">
+            <span class="field-label"><svg class="field-label-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="6" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h6.2M12.2 8v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Agent key</span>
+            <input id="signin-key" type="password" autocomplete="off" spellcheck="false" placeholder="agt_…" required aria-describedby="signin-key-hint">
+            <span class="field-hint" id="signin-key-hint">Starts with agt_. Use one allowed to approve. Stored only in this browser.</span>
+          </label>
+          <button class="btn btn-quiet" type="submit">Open console with a key</button>
+          <p id="signin-key-error" class="error" role="alert" hidden></p>
+        </form>
+      </details>
+    </div>
+  </section>
+
+  <!-- Workspace picker: shown after session sign-in when the person belongs to several workspaces, or none. -->
+  <section id="workspace-picker" class="signin" hidden>
+    <div class="signin-card">
+      <p class="wordmark"><svg class="oc-brand oc-lockup" width="146" height="24" role="img" aria-label="OpenCadre"><use href="#oc-lockup"/></svg></p>
+      <div class="ui-vignette" aria-hidden="true"><span></span><span></span><span></span></div>
+      <h1 class="signin-title">Choose a workspace</h1>
+      <p class="muted" id="workspace-picker-note"><span class="avatar-chip" aria-hidden="true"></span> Signed in as <span id="workspace-picker-whoami"></span>.</p>
+      <p id="workspace-picker-empty" class="field-hint" hidden><span id="workspace-picker-empty-text">You're not in a workspace yet. Ask a workspace owner for an invite link.</span></p>
+      <div id="workspace-list" class="workspace-list"></div>
+      <details class="advanced-connect" id="workspace-create-details">
+        <summary>Create a new workspace</summary>
+        <form id="workspace-create-form" class="stack">
+          <label class="field">
+            <span class="field-label">Workspace name</span>
+            <input id="workspace-create-name" type="text" placeholder="Acme Corp" maxlength="80" required>
+          </label>
+          <button class="btn btn-ink" type="submit">Create workspace</button>
+          <p id="workspace-create-error" class="error" role="alert" hidden></p>
+        </form>
+      </details>
+      <button class="btn btn-quiet signin-signout-link" id="workspace-picker-signout" type="button">Sign out</button>
+    </div>
+  </section>
+
+  <!-- Invite accept: /app/?invite=<token> -->
+  <section id="invite-accept" class="signin" hidden>
+    <div class="signin-card">
+      <p class="wordmark"><svg class="oc-brand oc-lockup" width="146" height="24" role="img" aria-label="OpenCadre"><use href="#oc-lockup"/></svg></p>
+      <div class="ui-vignette" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div id="invite-loading" class="muted signin-loading">Checking invite…</div>
+      <div id="invite-body" hidden>
+        <h1 class="signin-title">You're invited</h1>
+        <p class="muted"><strong id="invite-workspace-name"></strong> invited you to join as <strong id="invite-role"></strong>.</p>
+        <div id="invite-signed-out" class="stack" hidden>
+          <button class="btn btn-oauth" id="invite-github" type="button" hidden>Continue with GitHub</button>
+          <button class="btn btn-oauth" id="invite-google" type="button" hidden>Continue with Google</button>
+          <form id="invite-email-form" class="stack" hidden>
+            <label class="field">
+              <span class="field-label">Email</span>
+              <input id="invite-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+            </label>
+            <button class="btn btn-quiet" type="submit">Send magic link</button>
+          </form>
+        </div>
+        <div id="invite-signed-in" class="stack" hidden>
+          <p class="field-hint"><span class="avatar-chip" aria-hidden="true"></span> Signed in as <span id="invite-whoami"></span>.</p>
+          <button class="btn btn-ink" id="invite-accept-btn" type="button">Accept invite</button>
+        </div>
+        <p id="invite-error" class="error" role="alert" hidden></p>
+      </div>
+      <p id="invite-invalid" class="error" role="alert" hidden>This invite link is no longer valid. Ask whoever sent it for a new one.</p>
+    </div>
+  </section>
+
+  <!-- Console -->
+  <div id="console" class="console" hidden>
+    <!-- The first tab stop: past the sidebar straight to the page. app.js moves focus to main, keeping the address. -->
+    <a class="skip-link" id="skip-link" href="#main">Skip to content</a>
+    <div class="shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+          <p class="console-brand"><svg class="oc-brand oc-lockup" width="146" height="24" role="img" aria-label="OpenCadre"><use href="#oc-lockup"/></svg><svg class="oc-brand oc-mark" width="24" height="24" role="img" aria-label="OpenCadre"><use href="#oc-mark"/></svg></p>
+          <button class="workspace-switcher" id="workspace-switcher-btn" type="button" aria-labelledby="org-name workspace-switcher-action">
+            <span class="ws-avatar" id="ws-avatar" aria-hidden="true"></span>
+            <span class="sidebar-org" id="org-name"></span>
+            <span class="visually-hidden" id="workspace-switcher-action">Switch workspace</span>
+            <span class="ws-plan" id="ws-plan" hidden></span>
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 7.5 10 4.5l3 3M7 12.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="find-btn" id="find-btn" type="button" aria-keyshortcuts="f" aria-haspopup="dialog" title="Find (F)">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m13.2 13.2 3.3 3.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Find</span><kbd>F</kbd>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav" id="tabs-nav" aria-label="Sections">
+          <button class="nav-item nav-item-top" data-tab="overview" aria-current="page" title="Home">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9 10 3.5 16.5 9v7.5h-4.5v-4.5h-4v4.5H3.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span class="nav-label">Home</span>
+          </button>
+          <button class="nav-item" data-tab="inbox" title="Inbox">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 5.5l7 5.5 7-5.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="nav-label">Inbox</span>
+            <span class="badge" id="inbox-badge" hidden></span>
+          </button>
+          <button class="nav-item" data-tab="fleet" title="Agents">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="14" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 16c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4M12 12.4c.6-.3 1.3-.4 2-.4 1.8 0 3.1 1.2 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="nav-label">Agents</span>
+          </button>
+          <button class="nav-item" data-tab="tasks" title="Tasks">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 10l2.2 2.2L14 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="nav-label">Tasks</span>
+          </button>
+          <button class="nav-item" data-tab="timeline" title="Activity">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 10h3l2-5 3.5 10 2-5h4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="nav-label">Activity</span>
+          </button>
+          <hr class="nav-divider">
+          <button class="nav-item" data-tab="connect" title="Add a computer">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="15" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7 16.5h6M10 13v3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 6.5v4M8 8.5h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="nav-label">Add a computer</span>
+          </button>
+          <button class="nav-item" data-tab="settings" title="Settings">
+            <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.1 5.1l1.4 1.4M13.5 13.5l1.4 1.4M5.1 14.9l1.4-1.4M13.5 6.5l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="nav-label">Settings</span>
+          </button>
+        </nav>
+
+        <nav class="settings-subnav" id="settings-subnav" aria-label="Settings pages" hidden>
+          <button class="settings-back" id="settings-back" type="button"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M12 4.5 6.5 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Settings</span></button>
+          <a href="#/settings/billing" data-settings-section="billing-card">Plan &amp; usage</a>
+          <a href="#/settings/workspace" data-settings-section="settings-org-card">Workspace</a>
+          <a href="#/settings/people" data-settings-section="members-card">People</a>
+          <a href="#/settings/projects" data-settings-section="projects-card">Projects</a>
+          <a href="#/settings/safety" data-settings-section="policy-card">Safety</a>
+          <a href="#/settings/notifications" data-settings-section="webhook-card">Notifications</a>
+        </nav>
+
+        <div class="sidebar-alert" id="sidebar-alert" hidden>
+          <div class="sidebar-alert-head"><strong id="sidebar-alert-title"></strong><span class="sidebar-alert-icon"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3 18 17H2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v4M10 14.5v.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></div>
+          <p id="sidebar-alert-meta"></p>
+          <button class="btn btn-quiet btn-sm" id="sidebar-alert-action" type="button">View plan</button>
+        </div>
+
+        <div class="sidebar-bottom">
+          <span class="user-avatar" id="user-avatar" aria-hidden="true"></span>
+          <span class="whoami" id="whoami"></span>
+          <div class="live-status" id="live-status" title="Connection status" hidden><span class="live-dot" id="live-dot"></span><span id="live-status-text">Connecting…</span></div>
+          <span class="live" id="fleet-count" aria-live="polite"></span>
+          <button class="user-menu-btn" id="user-menu-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu" title="Account menu"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="4.5" cy="10" r="1.4" fill="currentColor"/><circle cx="10" cy="10" r="1.4" fill="currentColor"/><circle cx="15.5" cy="10" r="1.4" fill="currentColor"/></svg></button>
+          <div class="user-menu" id="user-menu" role="menu" hidden>
+            <div class="user-menu-head"><strong id="user-menu-name"></strong><span id="user-menu-email"></span></div>
+            <div class="user-menu-row" role="none"><span>Theme</span>
+              <div class="theme-switch" role="radiogroup" aria-label="Theme">
+                <button type="button" role="radio" data-theme-choice="system" aria-label="Match system">System</button>
+                <button type="button" role="radio" data-theme-choice="light" aria-label="Light">Light</button>
+                <button type="button" role="radio" data-theme-choice="dark" aria-label="Dark">Dark</button>
+              </div>
+            </div>
+            <button class="user-menu-item" role="menuitem" id="signout" type="button">Sign out</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Mobile only (<=767px): the sidebar becomes this bottom bar, with the four most-used destinations and the rest
+           under More (docs/design/CONSOLE-V2.md §3). -->
+      <nav class="bottom-bar" id="bottom-bar" aria-label="Sections, phone bar">
+        <button class="bottom-bar-item" data-tab="overview" aria-current="page">
+          <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9 10 3.5 16.5 9v7.5h-4.5v-4.5h-4v4.5H3.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="bottom-bar-item" data-tab="inbox">
+          <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 5.5l7 5.5 7-5.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Inbox</span>
+          <span class="badge" id="inbox-badge-mobile" hidden></span>
+        </button>
+        <button class="bottom-bar-item" data-tab="fleet">
+          <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="14" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 16c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4M12 12.4c.6-.3 1.3-.4 2-.4 1.8 0 3.1 1.2 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span>Agents</span>
+        </button>
+        <button class="bottom-bar-item" data-tab="tasks">
+          <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 10l2.2 2.2L14 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Tasks</span>
+        </button>
+        <button class="bottom-bar-item" id="more-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="more-drawer">
+          <svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="4" cy="10" r="1.4" fill="currentColor"/><circle cx="10" cy="10" r="1.4" fill="currentColor"/><circle cx="16" cy="10" r="1.4" fill="currentColor"/></svg>
+          <span>More</span>
+        </button>
+      </nav>
+
+      <div class="drawer-backdrop" id="more-drawer-backdrop" hidden></div>
+      <div class="drawer" id="more-drawer" role="dialog" aria-modal="true" aria-label="More sections" hidden>
+        <div class="drawer-head">
+          <strong>More</strong>
+          <button class="btn btn-quiet btn-sm" id="more-drawer-close" type="button" aria-label="Close">✕</button>
+        </div>
+        <nav class="drawer-nav" aria-label="More pages">
+          <button class="nav-item" data-tab="connect"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="nav-label">Add a computer</span></button>
+          <button class="nav-item" data-tab="timeline"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 10h3l2-5 3.5 10 2-5h4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="nav-label">Activity</span></button>
+          <button class="nav-item" data-tab="settings"><svg class="nav-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.1 5.1l1.4 1.4M13.5 13.5l1.4 1.4M5.1 14.9l1.4-1.4M13.5 6.5l1.4-1.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="nav-label">Settings</span></button>
+        </nav>
+        <div class="drawer-foot">
+          <button class="nav-item" id="find-btn-mobile" type="button"><span class="nav-label">Find</span></button>
+          <div class="user-menu-row"><span>Theme</span>
+            <div class="theme-switch" role="radiogroup" aria-label="Theme">
+              <button type="button" role="radio" data-theme-choice="system" aria-label="Match system">System</button>
+              <button type="button" role="radio" data-theme-choice="light" aria-label="Light">Light</button>
+              <button type="button" role="radio" data-theme-choice="dark" aria-label="Dark">Dark</button>
+            </div>
+          </div>
+          <button class="nav-item" id="signout-mobile" type="button"><span class="nav-label">Sign out</span></button>
+        </div>
+      </div>
+
+      <div class="shell-main">
+        <div id="paused-banner" class="paused-banner" role="alert" hidden>
+          <div class="paused-banner-text">
+            <strong>Workspace paused</strong>
+            <span id="paused-banner-meta"></span>
+          </div>
+          <button class="btn btn-ink" id="resume-btn" type="button">Resume</button>
+        </div>
+
+        <div id="billing-banner" class="billing-banner" role="status" hidden>
+          <div class="billing-banner-text">
+            <strong id="billing-banner-title"></strong>
+            <span id="billing-banner-meta"></span>
+          </div>
+          <button class="btn btn-ink btn-sm" id="billing-banner-action" type="button">View plan</button>
+        </div>
+
+        <!-- A refresh that failed, a Home source that failed, or Home gone stale (syncNotice in app.js). The line is not a
+             live region: it changes priority without anything new. #refresh-announce is, always present and empty until
+             something opens, so a screen reader hears each failure once, when it starts. -->
+        <p id="refresh-notice" class="refresh-notice"></p>
+        <p id="refresh-announce" class="visually-hidden" role="status" aria-live="polite"></p>
+
+        <main class="board" id="main" tabindex="-1">
+      <section class="panel" data-panel="overview" aria-labelledby="h-overview">
+        <div class="panel-head home-head">
+          <div class="home-head-text">
+            <h1 id="h-overview">Home</h1>
+            <svg class="home-spark" viewBox="0 0 80 24" width="80" height="24" aria-hidden="true" focusable="false"><polyline points="0,18 12,14 24,16 36,8 48,11 60,5 72,8 80,4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p class="panel-note" id="overview-subtitle" hidden></p>
+          </div>
+          <!-- When Home's data is from (renderHomeFreshness): the last refresh that was applied, never a promise of "live".
+               Not a live region: it ticks. A failed or stale refresh is announced once by #refresh-announce. -->
+          <div class="home-fresh" id="home-fresh" hidden>
+            <svg class="home-fresh-glyph" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="4.25"/><circle class="home-fresh-dot" cx="6" cy="6" r="1.5"/></svg>
+            <span id="home-fresh-text"></span>
+            <button class="btn btn-sm btn-quiet" id="home-fresh-action" type="button" hidden>Refresh</button>
+          </div>
+          <!-- The hatch that marks a lapsed claim in the Open tasks strip. Its stroke is a class (app.css), never an attribute. -->
+          <svg class="viz-defs" aria-hidden="true" focusable="false" width="0" height="0"><defs><pattern id="viz-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="viz-hatch-bg" width="5" height="5"/><line class="viz-hatch-line" x1="0" y1="0" x2="0" y2="5"/></pattern></defs></svg>
+        </div>
+
+        <!-- Before a plan exists, Home says the one thing to do next (renderHomeNext). Every other action on Home needs
+             the plan first, so they wait behind it rather than dead-ending. -->
+        <section class="home-next" id="home-next" aria-labelledby="home-next-title" hidden>
+          <div class="home-next-text">
+            <h3 id="home-next-title">No plan yet</h3>
+            <p id="home-next-meta"></p>
+          </div>
+          <button class="btn btn-ink" id="home-next-action" type="button" hidden>View plan</button>
+        </section>
+
+        <div id="first-run-card" class="onboarding-card first-run-card" hidden>
+          <div class="onboarding-head">
+            <strong>Your workspace is ready</strong>
+            <button class="btn btn-quiet btn-sm onboarding-hide" id="first-run-hide" type="button">Hide</button>
+          </div>
+          <div class="ui-vignette" aria-hidden="true"><span></span><span></span><span></span></div>
+          <ol class="onboarding-steps first-run-steps" id="first-run-steps">
+            <li class="onboarding-step is-done" id="first-run-step-workspace">
+              <span class="onboarding-step-check" aria-hidden="true">✓</span>
+              <span class="onboarding-step-label" id="first-run-workspace-label">Workspace created</span>
+            </li>
+            <li class="onboarding-step" id="first-run-step-command">
+              <span class="onboarding-step-check" aria-hidden="true"></span>
+              <span class="onboarding-step-label">Copy one command and run it on this computer</span>
+              <button class="btn btn-ink btn-sm" type="button" id="first-run-get-command">Get my command</button>
+              <div class="connect-cmd-box first-run-cmd" id="first-run-cmd" hidden>
+                <code class="connect-cmd" id="first-run-cmd-text"></code>
+                <button class="btn btn-quiet btn-sm" type="button" id="first-run-copy">Copy</button>
+              </div>
+              <span class="status-chip chip-waiting" id="first-run-status" hidden></span>
+            </li>
+            <li class="onboarding-step" id="first-run-step-agents">
+              <span class="onboarding-step-check" aria-hidden="true"></span>
+              <span class="onboarding-step-label" id="first-run-agents-label">Agents appear here as each chat connects</span>
+              <a class="btn btn-quiet btn-sm" id="first-run-projects" href="#/settings/projects" data-settings-link="projects" hidden>Settings → Projects</a>
+            </li>
+          </ol>
+          <div class="first-run-key" id="first-run-key" hidden>
+            <div class="first-run-key-head">
+              <strong id="first-run-key-title">Your first agent key</strong>
+              <button class="btn btn-quiet btn-sm" type="button" id="first-run-key-copy">Copy key</button>
+            </div>
+            <p class="first-run-key-note" id="first-run-key-note"></p>
+            <button class="btn btn-quiet btn-sm" type="button" id="first-run-key-go" hidden>Go to Rotate key</button>
+            <pre class="first-run-key-value" id="first-run-key-value"></pre>
+          </div>
+        </div>
+
+        <!-- Home is a dispatch board (docs/design/CONSOLE-V2.md §4.4): four tiles, the goal, what is waiting on you, who is
+             working on what and recent activity, with the fleet map and the plan's limits beside them (console dashboard
+             phase 1). The tiles are built once per workspace and re-labelled after (renderHomeTiles). -->
+        <div class="home-tiles" id="overview-metrics" role="group" aria-label="At a glance"></div>
+
+        <section class="home-goal" id="overview-goal" aria-labelledby="h-overview-goal" hidden>
+          <div class="home-goal-head">
+            <h3 id="h-overview-goal">Fleet goal</h3>
+            <span class="home-goal-meta" id="overview-goal-meta"></span>
+            <button class="btn btn-sm btn-quiet" id="overview-goal-toggle" type="button" aria-expanded="false" hidden>Show all</button>
+          </div>
+          <p class="home-goal-text" id="overview-goal-text"></p>
+        </section>
+
+        <div class="home-grid">
+        <div class="home-main">
+        <div class="overview-section">
+          <div class="overview-section-head">
+            <h3>Waiting on you</h3>
+            <span class="overview-count" id="overview-attention-count" hidden></span>
+          </div>
+          <div id="overview-attention" class="strips"></div>
+        </div>
+
+        <div class="overview-section" id="overview-happening-section" hidden>
+          <div class="overview-section-head">
+            <h3>Working now</h3>
+            <span class="overview-fleet-summary" id="overview-fleet-summary"></span>
+            <button class="btn btn-quiet btn-sm" type="button" id="overview-view-fleet">All agents</button>
+          </div>
+          <p class="home-caption" id="overview-happening-caption" hidden><span id="overview-happening-caption-text"></span> <button class="btn btn-sm btn-quiet" type="button" data-home-retry>Retry</button></p>
+          <div id="overview-happening" class="strips"></div>
+          <p class="home-background" id="overview-background" hidden></p>
+        </div>
+
+        <div class="overview-section">
+          <div class="overview-section-head">
+            <h3>Recent activity</h3>
+            <button class="btn btn-quiet btn-sm" type="button" id="overview-view-timeline">All activity</button>
+          </div>
+          <p class="home-caption" id="overview-activity-caption" hidden><span id="overview-activity-caption-text"></span> <button class="btn btn-sm btn-quiet" type="button" data-home-retry>Retry</button></p>
+          <div id="overview-activity" class="strips"></div>
+        </div>
+        </div>
+
+        <div class="home-rail">
+          <!-- The fleet map: an image of the Working now list beside it (the list is its table), so it has no controls. -->
+          <figure class="home-card home-fleet" id="home-fleet-card" aria-labelledby="h-home-fleet" hidden>
+            <div class="home-card-head">
+              <h3 id="h-home-fleet">Fleet</h3>
+            </div>
+            <div id="home-fleet-map" class="home-fleet-map"></div>
+            <ul class="home-legend" aria-label="Key">
+              <li><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><circle class="viz-glyph viz-glyph--online" cx="6" cy="6" r="4.5"/></svg>online</li>
+              <li><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><circle class="viz-glyph viz-glyph--waiting is-ring" cx="6" cy="6" r="3.75"/><circle class="viz-glyph viz-glyph--waiting" cx="6" cy="6" r="1.75"/></svg>waiting</li>
+              <li><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false"><circle class="viz-glyph viz-glyph--idle is-ring" cx="6" cy="6" r="3.75"/></svg>idle</li>
+              <li><svg viewBox="0 0 18 12" width="18" height="12" aria-hidden="true" focusable="false"><line class="viz-wire is-needs" x1="0" y1="6" x2="18" y2="6"/></svg>needs you</li>
+            </ul>
+            <figcaption class="home-card-foot">
+              <span id="home-fleet-more"></span>
+              <span class="home-caption" id="home-fleet-caption" hidden><span id="home-fleet-caption-text"></span></span>
+            </figcaption>
+          </figure>
+
+          <section class="home-card home-limits" id="home-limits-card" aria-labelledby="h-home-limits" hidden>
+            <div class="home-card-head">
+              <h3 id="h-home-limits">Plan limits</h3>
+              <span class="home-trial" id="home-limits-trial" hidden></span>
+            </div>
+            <div id="home-limits-rows" class="home-limits-rows"></div>
+            <p class="home-caption" id="home-limits-caption" hidden><span id="home-limits-caption-text"></span> <button class="btn btn-sm btn-quiet" type="button" data-home-retry>Retry</button></p>
+          </section>
+        </div>
+        </div>
+
+        <div id="onboarding-card" class="onboarding-card" hidden>
+          <div class="onboarding-head">
+            <strong>Get your fleet running</strong>
+            <span class="onboarding-progress" id="onboarding-progress-text"></span>
+            <button class="btn btn-quiet btn-sm onboarding-hide" id="onboarding-hide" type="button">Hide</button>
+          </div>
+          <ol class="onboarding-steps" id="onboarding-steps"></ol>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="inbox" aria-labelledby="h-inbox">
+        <div class="panel-head">
+          <h1 id="h-inbox">Inbox</h1>
+          <button class="btn btn-quiet btn-sm" id="inbox-mark-all-read" type="button" hidden>Mark all read</button>
+        </div>
+
+        <div class="inbox-tabs" role="tablist" aria-label="Inbox view">
+          <button class="inbox-view-tab" type="button" role="tab" data-inbox-view="queue" aria-selected="true">Queue</button>
+          <button class="inbox-view-tab" type="button" role="tab" data-inbox-view="history" aria-selected="false">History</button>
+        </div>
+
+        <div id="inbox-queue-view" class="inbox-workspace">
+          <div class="inbox-queue-list">
+          <div class="filter-bar" id="inbox-filter-bar">
+            <button class="filter-chip" type="button" data-filter="all" aria-pressed="true">All</button>
+            <button class="filter-chip" type="button" data-filter="approvals" aria-pressed="false">Approvals</button>
+            <button class="filter-chip" type="button" data-filter="messages" aria-pressed="false">Messages</button>
+            <button class="filter-chip" type="button" data-filter="mentions" aria-pressed="false">Mentions</button>
+          </div>
+          <div id="clearances" class="strips" data-inbox-section="approvals"></div>
+          <div id="inbox-list" class="strips" data-inbox-section="messages"></div>
+          <div id="inbox-mentions" class="strips" data-inbox-section="mentions"></div>
+          <div class="inbox-all-clear empty-state" id="inbox-all-clear" hidden>
+            <svg class="empty-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5 9.2 17 19 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p class="empty-line"><strong>All caught up</strong></p>
+            <button class="btn btn-quiet btn-sm" id="inbox-view-activity" type="button">View activity</button>
+          </div>
+          </div>
+          <aside id="inbox-focus" class="inbox-focus" aria-label="Selected inbox item">
+            <div class="empty empty-state"><svg class="empty-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 7.5 12 13l9-5.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><p class="empty-line"><strong>Select an item</strong></p></div>
+          </aside>
+        </div>
+
+        <div id="inbox-history-view" hidden>
+          <div id="grants" class="grants"></div>
+          <div class="filter-bar">
+            <button class="filter-chip" type="button" id="history-show-noted" aria-pressed="false">Show noted commands</button>
+          </div>
+          <ol id="history" class="history-list"></ol>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="fleet" aria-labelledby="h-fleet">
+        <div class="panel-head">
+          <h1 id="h-fleet">Agents</h1>
+        </div>
+        <p class="callout connector-banner" id="fleet-connector-banner" role="status" hidden></p>
+
+        <div class="fleet-view-toggle" role="group" aria-label="Fleet view">
+          <button class="view-toggle-btn is-active" type="button" data-view="project" aria-pressed="true">By project</button>
+          <button class="view-toggle-btn" type="button" data-view="computer" aria-pressed="false">By computer</button>
+          <button class="view-toggle-btn" type="button" data-view="agents" aria-pressed="false" aria-label="Agents without a linked computer"><span class="label-long">Agents without a linked computer</span><span class="label-short" aria-hidden="true">Unlinked</span></button>
+        </div>
+
+        <div id="fleet-sessions-view">
+          <div id="fleet-groups"></div>
+
+          <!-- F4 (docs/design/CONSOLE-V2.md §5b): which agent holds which file. Agents claim a file before editing it so
+               two of them don't collide; until now only the agents could see those claims. -->
+          <section class="overview-section fleet-locks" id="fleet-locks" aria-labelledby="h-fleet-locks" hidden>
+            <div class="overview-section-head">
+              <h3 id="h-fleet-locks">Locked files</h3>
+              <span class="overview-fleet-summary" id="fleet-locks-summary"></span>
+            </div>
+            <div id="fleet-locks-list" class="strips"></div>
+          </section>
+
+          <!-- Operator-only, By-project view only (docs/design/HUB_REDESIGN.md 1.8.1/5.5): a quiet
+               nudge toward Settings' Projects section, never the not-enabled project list itself. -->
+
+          <details class="history" id="sessions-ended" hidden>
+            <summary id="sessions-ended-summary">0 ended today</summary>
+            <ol id="sessions-ended-list" class="history-list"></ol>
+          </details>
+        </div>
+
+        <div id="fleet-agents-view" hidden>
+          <span class="unlinked-note" title="Own key"><svg class="field-label-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="6" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 8h6.2M12.2 8v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span class="visually-hidden">Own key</span></span>
+          <div id="fleet-other-agents" class="strips"></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="tasks" aria-labelledby="h-tasks">
+        <div class="panel-head">
+          <h1 id="h-tasks">Tasks</h1>
+        </div>
+        <form id="task-form" class="task-form">
+          <input id="task-title" type="text" placeholder="New task" maxlength="200" required aria-label="Task title">
+          <div class="task-toolbar" id="task-toolbar">
+            <input id="task-search" type="search" placeholder="Search tasks" aria-label="Search tasks" autocomplete="off">
+            <select id="task-project-filter" aria-label="Filter tasks by project" hidden><option value="">All projects</option></select>
+            <span class="task-toolbar-count muted" id="task-toolbar-count" aria-live="polite"></span>
+          </div>
+          <button class="btn btn-ink" type="submit">Add task</button>
+          <details class="task-form-more" id="task-form-more">
+            <summary>More options</summary>
+            <textarea id="task-description" rows="3" maxlength="8000" placeholder="Done when…" aria-label="Description"></textarea>
+            <div class="task-form-row">
+              <label class="field">
+                <span class="field-label">Project</span>
+                <select id="task-project">
+                  <option value="">Any project</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="field-label">Reviews before it counts as done</span>
+                <select id="task-reviews">
+                  <option value="1" selected>1 (the person who accepts it)</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </label>
+            </div>
+          </details>
+        </form>
+        <div id="tasks" class="task-columns"></div>
+      </section>
+
+      <section class="panel" data-panel="timeline" aria-labelledby="h-timeline">
+        <div class="panel-head">
+          <h1 id="h-timeline">Activity</h1>
+        </div>
+        <section class="activity-updates" aria-labelledby="h-activity-updates" hidden>
+          <h3 id="h-activity-updates">Since your last check</h3>
+          <div id="awareness-summary" class="awareness-summary"></div>
+          <div id="awareness-items" class="strips awareness-feed"></div>
+        </section>
+        <div class="timeline-controls">
+          <label class="field filter-field">
+            <span class="field-label visually-hidden">Filter by event type</span>
+            <select id="timeline-filter" aria-label="Filter timeline events by type">
+              <option value="">All events</option>
+              <option value="task.">Tasks</option>
+              <option value="approval.">Approvals</option>
+              <option value="message.,question.">Messages &amp; Questions</option>
+              <option value="agent.">Agent state</option>
+              <option value="conflict.">Conflicts</option>
+              <option value="decision.recorded">Decisions</option>
+            </select>
+          </label>
+          <label class="field filter-field">
+            <span class="field-label visually-hidden">Filter by agent</span>
+            <select id="timeline-agent-filter" aria-label="Filter timeline events by agent">
+              <option value="">All agents</option>
+            </select>
+          </label>
+          <button class="btn btn-quiet" id="timeline-refresh" type="button" aria-label="Refresh"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.6-4.1M16 3.5V7h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div id="timeline" class="strips timeline-feed"></div>
+
+      </section>
+
+      <section class="panel" data-panel="connect" aria-labelledby="h-connect">
+        <div class="panel-head">
+          <h1 id="h-connect">Add a computer or app</h1>
+          <div class="connect-mode connect-kind" role="tablist" aria-label="What to connect">
+            <button type="button" role="tab" id="connect-kind-computer" aria-selected="true" aria-controls="connect-kind-computer-panel" tabindex="0">Computer</button>
+            <button type="button" role="tab" id="connect-kind-app" aria-selected="false" aria-controls="connect-kind-app-panel" tabindex="-1">App</button>
+          </div>
+        </div>
+
+        <div class="connect-mode-panel" id="connect-kind-app-panel" role="tabpanel" aria-labelledby="connect-kind-app" tabindex="0" hidden>
+          <p class="app-cards-status" id="connect-apps-status" role="status" hidden></p>
+          <ul class="app-cards" id="connect-apps"></ul>
+          <button type="button" class="btn-link connect-apps-computer" id="connect-apps-computer">Approvals and wake: add this computer</button>
+        </div>
+        <div class="connect-mode-panel" id="connect-kind-computer-panel" role="tabpanel" aria-labelledby="connect-kind-computer" tabindex="0">
+        <p class="connect-plan-note" id="connect-plan-note" hidden></p>
+
+        <ol class="connect-wizard" id="connect-wizard">
+          <li class="wizard-step" id="wizard-step-name" data-state="current">
+            <span class="wizard-marker" aria-hidden="true"></span>
+            <div class="wizard-body">
+              <h3>Connect each computer</h3>
+              <form id="add-computer-form" class="connect-name-form">
+                <label class="visually-hidden" for="computer-name">Computer name</label>
+                <input id="computer-name" type="text" placeholder="Work laptop" maxlength="80" required autocomplete="off">
+                <button class="btn btn-ink" id="btn-add-computer" type="submit">Get a connect code</button>
+              </form>
+              <p id="computer-error" class="error" role="alert" hidden></p>
+              <p class="wizard-done-line" id="wizard-name-done" hidden></p>
+            </div>
+          </li>
+
+          <li class="wizard-step" id="wizard-step-run" data-state="upcoming">
+            <span class="wizard-marker" aria-hidden="true"></span>
+            <div class="wizard-body">
+              <h3>Run the connect command on that computer</h3>
+              <div class="wizard-dead callout" id="wizard-dead" role="alert" hidden>
+                <p id="wizard-dead-text"></p>
+                <button class="btn btn-ink btn-sm" id="wizard-dead-retry" type="button">Get a new code</button>
+              </div>
+              <div id="computer-output" class="fast-connect-output" hidden>
+                <div class="connect-card">
+                  <div class="connect-card-head">
+                    <div class="connect-code-block">
+                      <span class="connect-code-label">Connect code</span>
+                      <code class="connect-code" id="computer-code"></code>
+                    </div>
+                    <span class="connect-once">Works once</span>
+                    <span class="connect-timer" id="computer-timer">Expires in 15:00</span>
+                  </div>
+                  <div class="connect-agent-prompt">
+                  <div class="connect-mode" role="tablist" aria-label="Who runs the command">
+                    <button type="button" role="tab" id="connect-mode-self" aria-selected="true" aria-controls="connect-mode-self-panel" tabindex="0">I'll run it</button>
+                    <button type="button" role="tab" id="connect-mode-agent" aria-selected="false" aria-controls="connect-mode-agent-panel" tabindex="-1">My AI agent will run it</button>
+                  </div>
+                  <div class="connect-mode-panel" id="connect-mode-self-panel" role="tabpanel" aria-labelledby="connect-mode-self">
+                    <ol class="connect-howto">
+                      <li>On that computer, open a terminal in the project folder you want your agents to work in. You need <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js 20</a> or newer.</li>
+                      <li>Paste this command and press Enter:</li>
+                    </ol>
+                    <div class="connect-cmd-box">
+                      <code class="connect-cmd" id="computer-cmd-text"></code>
+                      <button class="btn btn-ink btn-sm" id="computer-copy-btn" type="button">Copy command</button>
+                    </div>
+                    <p class="works-with">Works with Claude Code, Codex and Cursor</p>
+                  </div>
+                  <div class="connect-mode-panel" id="connect-mode-agent-panel" role="tabpanel" aria-labelledby="connect-mode-agent" hidden>
+                    <div class="connect-cmd-box">
+                      <code class="connect-cmd" id="computer-agent-prompt-text"></code>
+                      <button class="btn btn-ink btn-sm" id="computer-agent-prompt-copy-btn" type="button">Copy prompt</button>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="wizard-step" id="wizard-step-chat" data-state="upcoming">
+            <span class="wizard-marker" aria-hidden="true"></span>
+            <div class="wizard-body">
+              <h3>Finish setup for each tool</h3>
+              <p class="wizard-projects" id="wizard-projects">Chats join from: <span id="wizard-projects-list">the folder you connect from</span><span id="wizard-projects-link"> · <a href="#/settings/projects" data-settings-link="projects">Manage projects</a></span></p>
+              <div class="connect-status-bar">
+                <span class="connect-status-label visually-hidden">Status:</span>
+                <span class="status-chip chip-waiting" id="computer-status-chip" hidden>Waiting for computer to connect…</span>
+              </div>
+              <p class="wizard-hint" id="wizard-chat-hint"></p>
+              <ul class="connect-howto" id="wizard-client-steps">
+                <li data-connect-client="claude-code"><b>Claude Code:</b> Restart Claude Code to load OpenCadre's tools. If the connect command joined the chat you were using, return to that same chat after restarting; otherwise open a chat in the enabled project.</li>
+                <li data-connect-client="codex"><b>Codex desktop:</b> Send one ordinary message from the project folder so its hooks appear in Settings &gt; Hooks. Review and trust each OpenCadre hook, then start a new chat in that folder.</li>
+                <li data-connect-client="codex"><b>Codex CLI:</b> In the project folder, use /hooks to review and trust each OpenCadre hook, then start a new chat.</li>
+                <li data-connect-client="cursor"><b>Cursor:</b> Open the enabled project folder in the editor. Enable opencadre-project in Customize &gt; MCPs, then select Opencadre Project under Add agents, context, tools &gt; MCP for that chat. Review any permission prompts. The empty Agents window has no project tools.</li>
+              </ul>
+              <p class="wizard-check" id="wizard-chat-check"><code>Use OpenCadre to show the active agents in this workspace.</code> <button class="btn btn-quiet btn-sm" type="button" id="wizard-copy-check">Copy</button> <span class="wizard-check-note">Passes when the call succeeds and the chat appears on Agents. It does not verify approvals or idle wake.</span></p>
+              <div class="wizard-actions">
+                <button class="btn btn-quiet btn-sm" id="wizard-go-agents" type="button" hidden>Go to Agents</button>
+                <a class="btn btn-quiet btn-sm" id="wizard-go-projects" href="#/settings/projects" data-settings-link="projects" hidden>Enable a project</a>
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <section class="connect-computers" aria-labelledby="h-connector-update">
+          <h3 id="h-connector-update">Update a connected computer</h3>
+          <button class="btn btn-quiet btn-sm" id="connector-update-check" type="button">Get current upgrade command</button>
+          <p id="connector-update-result" class="muted" role="status" aria-live="polite"></p>
+          <details class="connect-troubleshoot">
+            <summary>Troubleshoot a computer</summary>
+            <ol>
+              <li>If a chat loses its tools or reports a missing identity stamp, run the upgrade command. This page cannot see which version the computer runs.</li>
+              <li>Save work and close affected tools before upgrading.</li>
+              <li>Reopen them afterwards. Review changed hooks before choosing Trust. An agent can prepare the update; hook trust needs your review.</li>
+            </ol>
+          </details>
+        </section>
+
+        <section class="connect-computers" id="connect-computers" aria-labelledby="h-connect-computers" hidden>
+          <div class="section-head">
+            <h3 id="h-connect-computers">Your computers</h3>
+            <button class="btn btn-quiet btn-sm" id="connect-computers-manage" type="button">Manage on Agents</button>
+          </div>
+          <div class="strips" id="connect-computers-list"></div>
+        </section>
+
+        <details class="advanced-connect" id="create-agent-key-details">
+          <summary>Set up a tool by hand with an agent key</summary>
+          <p class="panel-note" id="agent-form-note" hidden></p>
+          <form id="agent-form" class="stack connect-form">
+            <div class="field">
+              <label class="field-label" for="agent-name">Agent name</label>
+              <div class="name-row">
+                <input id="agent-name" type="text" placeholder="Codex-Laptop" maxlength="80" required>
+                <button class="btn btn-quiet" id="generate-agent-name" type="button">Generate name</button>
+              </div>
+            </div>
+            <label class="field" id="org-key-field">
+              <span class="field-label"><svg class="field-label-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> Organization key</span>
+              <input id="org-key" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" required aria-describedby="org-key-hint">
+              <span class="field-hint" id="org-key-hint">Used for this request only. Never stored.</span>
+            </label>
+            <button class="btn btn-quiet" type="submit">Create agent key</button>
+            <p id="agent-error" class="error" role="alert" hidden></p>
+          </form>
+          <div id="connect-output" class="connect-output" hidden>
+            <p class="callout">Copy this key now. It won't be shown again.</p>
+            <p class="field-label">Each agent needs its own key and its own working folder.</p>
+            <p class="field-label">Tool</p>
+            <div id="snippets" class="snippets"></div>
+          </div>
+        </details>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="settings" aria-labelledby="h-settings">
+        <div class="panel-head">
+          <h1 id="h-settings">Settings</h1>
+        </div>
+
+        <nav class="settings-index" id="settings-index" aria-label="Settings sections">
+          <a href="#/settings/billing" data-settings-section="billing-card">Plan &amp; usage</a>
+          <a href="#/settings/workspace" data-settings-section="settings-org-card">Workspace</a>
+          <a href="#/settings/people" data-settings-section="members-card">People</a>
+          <a href="#/settings/projects" data-settings-section="projects-card">Projects</a>
+          <a href="#/settings/safety" data-settings-section="policy-card">Safety</a>
+          <a href="#/settings/notifications" data-settings-section="webhook-card">Notifications</a>
+        </nav>
+
+        <div class="settings-grid" id="settings-grid">
+          <div class="card settings-card settings-card-wide billing-card" id="billing-card">
+            <div class="billing-head">
+              <div>
+                <h3>Plan &amp; usage</h3>
+                <p class="billing-plan" id="billing-plan">—</p>
+              </div>
+            </div>
+            <dl class="billing-usage" id="billing-usage"></dl>
+            <details class="rule-note billing-usage-note" id="billing-usage-note"><summary>Live agents</summary><p>Includes you. The workspace count, not the agents you can see.</p></details>
+            <p class="panel-note billing-note" id="billing-note" hidden></p>
+          </div>
+
+          <div class="card settings-card" id="settings-org-card">
+            <h3>Workspace</h3>
+            <div class="settings-fields">
+              <div class="field">
+                <span class="field-label">Name</span>
+                <span class="settings-val" id="settings-org-name">—</span>
+              </div>
+              <div class="field">
+                <span class="field-label">Workspace ID</span>
+                <div class="copyable-val">
+                  <code class="settings-code" id="settings-org-id">—</code>
+                  <button class="btn btn-sm btn-quiet" id="settings-copy-org-id" type="button">Copy</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Hub URL</span>
+                <div class="copyable-val">
+                  <code class="settings-code" id="settings-hub-url">—</code>
+                  <button class="btn btn-sm btn-quiet" id="settings-copy-hub-url" type="button">Copy</button>
+                </div>
+              </div>
+              <div class="field">
+                <span class="field-label">Signed in as</span>
+                <span class="settings-val" id="settings-session-name">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card settings-card settings-card-wide" id="members-card" hidden>
+            <h3>People</h3>
+            <div id="members-list" class="members-list"></div>
+            <div id="invites-list" class="invites-list"></div>
+            <form id="invite-form" class="policy-add-form">
+              <label class="field">
+                <span class="field-label">Role</span>
+                <select id="invite-role-select" aria-label="Role for this invite">
+                  <option value="member" selected>Member</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="field-label">Email (optional — locks the invite to that address)</span>
+                <input id="invite-email-input" type="email" placeholder="teammate@example.com" autocomplete="off">
+              </label>
+              <div class="card-footer">
+                <button class="btn btn-ink" type="submit">Create invite</button>
+              </div>
+            </form>
+            <p id="invite-link-result" class="callout" hidden></p>
+          </div>
+
+          <div class="card settings-card settings-card-wide" id="projects-card" hidden>
+            <h3>Projects</h3>
+            <details class="rule-note"><summary>Only enabled projects join</summary><p>Other folders stay silent. OpenCadre keeps no record of them.</p></details>
+            <div id="settings-projects" class="strips"></div>
+            <form class="project-add-form" id="project-add-form">
+              <label class="field">
+                <span class="field-label">Add a project by its git remote</span>
+                <input id="project-add-key" type="text" placeholder="github.com/owner/repo" autocomplete="off" spellcheck="false" maxlength="200">
+              </label>
+              <button class="btn btn-ink" type="submit">Add project</button>
+            </form>
+            <p class="error" id="project-add-error" role="alert" hidden></p>
+            <details><summary>No git remote?</summary><p>Run <code>opencadre connect</code> inside the folder.</p></details>
+
+            <div class="isolation" id="isolation-section" hidden>
+              <div class="isolation-head">
+                <div>
+                  <h4>Keep projects apart</h4>
+                  <details class="rule-note" id="isolation-hint"><summary>Kept to their project</summary><p>When this is on, an agent sees only its own project and projects linked to it. People in the workspace see everything either way.</p></details>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="isolation-toggle" role="switch" aria-describedby="isolation-hint isolation-status">
+                  <span class="switch-track" aria-hidden="true"></span>
+                  <span class="visually-hidden">Keep projects apart</span>
+                </label>
+              </div>
+              <p class="field-hint" id="isolation-status" aria-live="polite"></p>
+              <div class="isolation-refusal callout" id="isolation-refusal" role="alert" hidden></div>
+
+              <h4>Linked projects</h4>
+              <div class="strips" id="project-links-list"></div>
+              <form class="link-form" id="project-link-form">
+                <select id="link-project-a" aria-label="First project"></select>
+                <span class="link-and" aria-hidden="true">and</span>
+                <select id="link-project-b" aria-label="Second project"></select>
+                <button class="btn btn-quiet" type="submit">Link projects</button>
+              </form>
+              <p class="error" id="project-link-error" role="alert" hidden></p>
+            </div>
+          </div>
+
+          <div class="card settings-card settings-card-wide" id="policy-card" hidden>
+            <h3>Approval policy</h3>
+            <details class="rule-note"><summary>Risky commands need approval</summary><p>A project's own setting wins. Local config can tighten this, never loosen it.</p></details>
+            <div id="policy-body">
+              <div id="policy-loading" class="policy-loading">Loading policy…</div>
+              <div id="policy-error" class="error" role="alert" hidden></div>
+              <div id="policy-list" class="policy-list" hidden></div>
+              <form id="policy-add-form" class="policy-add-form" hidden>
+                <label class="field">
+                  <span class="field-label">Project (blank = workspace default)</span>
+                  <input id="policy-add-project" type="text" placeholder="github.com/owner/repo" autocomplete="off" spellcheck="false" maxlength="200">
+                </label>
+                <label class="field">
+                  <span class="field-label">Mode</span>
+                  <select id="policy-add-mode" aria-label="Clearance mode for this project">
+                    <option value="off">Off — no enforcement</option>
+                    <option value="notify" selected>Notify — records it, never blocks</option>
+                    <option value="ask">Ask — holds until someone approves</option>
+                    <option value="strict">Strict — ask, with no exemptions</option>
+                  </select>
+                </label>
+                <button class="btn btn-ink" type="submit">Set policy</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card settings-card settings-card-wide killswitch-card" id="killswitch-card" hidden>
+            <h3>Pause all agents</h3>
+            <div id="killswitch-body"></div>
+          </div>
+
+          <div class="card settings-card" id="webhook-card">
+            <h3>Webhook</h3>
+            <form id="webhook-form" class="stack webhook-form">
+              <label class="field">
+                <span class="field-label">Endpoint URL</span>
+                <input id="webhook-url" type="url" placeholder="https://example.com/webhook" autocomplete="off" spellcheck="false">
+              </label>
+              <label class="field">
+                <span class="field-label">Authorization header (optional)</span>
+                <input id="webhook-auth" type="text" placeholder="Bearer secret-token" autocomplete="off" spellcheck="false">
+              </label>
+              <p id="webhook-status" class="status-msg" hidden></p>
+              <div class="card-footer">
+                <div class="actions">
+                  <button class="btn btn-quiet" id="webhook-clear-btn" type="button">Clear webhook</button>
+                  <button class="btn btn-ink" id="webhook-save-btn" type="submit">Save webhook</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="card settings-card" id="push-card" hidden>
+            <h3>Phone notifications</h3>
+            <p class="push-privacy" id="push-privacy">Commands show on the lock screen.</p>
+            <div id="push-body">
+              <button class="btn btn-ink" id="push-enable-btn" type="button">Turn on phone notifications</button>
+            </div>
+            <div id="push-devices" class="push-devices" hidden>
+              <div id="push-devices-list" class="push-devices-list"></div>
+              <div class="actions">
+                <button class="btn btn-quiet btn-sm" id="push-test-btn" type="button">Send test</button>
+              </div>
+            </div>
+            <p id="push-status" class="status-msg" hidden></p>
+          </div>
+        </div>
+      </section>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focused approval: opened by a phone notification's deep link (?workspace=<orgId>#approval-<id>). -->
+  <div id="focused-approval-overlay" class="focused-approval-overlay" hidden></div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

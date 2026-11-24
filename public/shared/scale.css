@@ -1,0 +1,49 @@
+/* OpenCadre non-colour scale: type, radius and motion (B:\ai-work\temp\9d1f-design\direction.md s3, s4 and s6). The
+   motion tokens arrived with the home hero's animated demo, the first thing on the site that uses them.
+
+   What this file is: the values that are neither a colour nor a role, the same in every theme. The site links it
+   second, after /shared/tokens.css and before /site.css. The console adopts it in a later PR: today it still declares
+   its own --font, --space-*, --radius-* and --ease-standard in public/app, and a page that loaded both would have two
+   declarations of one name, which is exactly what #540 forbids.
+
+   What it must never contain: a colour of any kind (a literal or a var() of a colour primitive), a role, or a
+   prefers-color-scheme block. A name declared here is declared nowhere else the same page loads.
+   tests/console-token-source.test.ts holds these rules. */
+:root {
+  --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* Type. Tracking tightens as size grows; body text is never tracked. Weights: 400 body, 500 labels, 620-660
+     headings, 680 display, nothing above 700. rem, so browser zoom and text-size settings work. */
+  --fs-display: clamp(2.4rem, 4.4vw, 4rem);
+  --lh-display: 1.02;
+  --ls-display: -0.042em;
+  --fw-display: 680;
+  --fw-h1: 660;
+  --fw-h2: 650;
+  --fs-lead: clamp(1.02rem, 1.3vw, 1.16rem);
+  --lh-lead: 1.55;
+  --fs-label: 0.6875rem;  /* mono, uppercase badges */
+  --ls-label: 0.08em;
+
+  /* Radius, one ladder by role: controls 8-12, cards and tiles 16, the stage and modals 24, pills 999. */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Motion (direction.md s6): motion explains a state change, then stops. The home hero's demo is the first user.
+     Packets cross a wire in --dur-travel (public/site/demo.mjs LEG holds the same 800ms); the chip settles in
+     --dur-chip, only on a claim or a lease handover. Under reduced motion site.css makes every change instant. */
+  --dur-instant: 90ms;
+  --dur-fast: 140ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --dur-travel: 800ms;
+  --dur-chip: 240ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}

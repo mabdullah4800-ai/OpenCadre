@@ -1,0 +1,1 @@
+Create a scheduled task in THIS chat that runs every 1 minute (FREQ=MINUTELY;INTERVAL=1), notifications for failed runs only, with this exact prompt: $opencadre-inbox — run the OpenCadre routine: keep listening for mail (up to 10 waits), reply and do the requested work in this chat, checking mail between steps. This chat is its own OpenCadre session.

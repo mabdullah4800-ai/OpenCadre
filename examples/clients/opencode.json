@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "opencadre": {
+        "type": "remote",
+        "url": "https://hub.opencadre.example/mcp",
+        "headers": {
+          "Authorization": "Bearer agt_YOUR_KEY"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "opencadre",
+  "version": "1.0.0",
+  "description": "Live peer-to-peer messaging and clarification for AI coding agents, cross-platform and cross-machine.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && node scripts/pack-cli.mjs",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "smoke-test": "node scripts/mcp-smoke-test.mjs",
+    "verify:codex": "node scripts/verify-client-live.mjs codex",
+    "verify:gemini": "node scripts/verify-client-live.mjs gemini-cli",
+    "verify:grok": "node scripts/verify-client-live.mjs grok",
+    "verify:kimi": "node scripts/verify-client-live.mjs kimi",
+    "verify:qwen": "node scripts/verify-client-live.mjs qwen",
+    "verify:clients": "node scripts/verify-client-live.mjs all",
+    "fleet-health": "node scripts/fleet-health-smoke.mjs",
+    "migrate:postgres": "node scripts/migrate-to-postgres.mjs",
+    "migrate:postgres:dry-run": "node scripts/migrate-to-postgres.mjs --dry-run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
+    "pg": "^8.23.0",
+    "proxy-addr": "^2.0.8",
+    "ws": "^8.21.3",
+    "zod": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.5.1",
+    "@types/pg": "^8.23.1",
+    "@types/proxy-addr": "^2.0.3",
+    "@types/ws": "^8.18.1",
+    "happy-dom": "^20.14.5",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

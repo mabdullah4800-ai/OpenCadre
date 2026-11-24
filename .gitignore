@@ -1,0 +1,27 @@
+node_modules/
+dist/
+# Written into the deploy archive by scripts/deploy-archive.sh; never committed (a stale copy would outlive its ref).
+/cli-provenance.json
+data/
+*.log
+.env
+# Reasonix client config: can carry a live agent key. Ignored at any depth.
+reasonix.toml
+.reasonix/
+scratch-*.mjs
+scripts/dev/.console-shots/
+
+# Per-agent launchers carry a live agt_ key and must never be committed.
+# See AGENT-COORDINATION.md ("Credentials and working directories").
+scripts/launch-*.ps1
+!scripts/launch-agent.template.ps1
+
+# Per-agent Reasonix working folders. Each holds a reasonix.toml carrying a live agt_ key,
+# so it must never be committed. Create them with scripts/reasonix-agents.mjs; the folder a
+# session runs in decides its OpenCadre identity (a project reasonix.toml beats the machine-wide
+# config, and a wrong key fails closed instead of borrowing the machine identity).
+.worktrees/
+
+# Cursor connect writes an absolute local project path here.
+/.cursor/mcp.json
+

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "opencadre": {
+      "url": "https://hub.opencadre.example/mcp",
+      "headers": {
+        "Authorization": "Bearer agt_YOUR_KEY"
+      }
+    }
+  }
+}

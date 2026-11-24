@@ -1,0 +1,21 @@
+{
+  "name": "opencadre-cli",
+  "version": "0.1.0",
+  "description": "Connect an AI coding agent to an OpenCadre hub with one command from the console.",
+  "type": "module",
+  "bin": {
+    "opencadre": "bin/opencadre.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "templates",
+    "helpers",
+    "build.json",
+    "compat-policy.json"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "ISC"
+}

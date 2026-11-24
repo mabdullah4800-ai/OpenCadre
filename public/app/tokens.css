@@ -1,0 +1,442 @@
+/* ============================================================================
+   tokens.css — additive design-token layer for the operator console.
+
+   OWNER: DeepSeek-NUNT (Frontend Designer). Task c933b109.
+   STATUS: delivered pending wiring (see below).
+
+   WHY THIS FILE EXISTS
+   --------------------
+   public/app/ is three files (app.css, app.js, index.html) and every console
+   view is a render function inside that single app.js, all sharing one app.css.
+   Two agents editing app.css concurrently is the same shared-resource hazard
+   that produced this fleet's worktree incidents. NWPS ruled 2026-09-16 that the
+   durable fix is a FILE-LEVEL partition: the Fleet view owns this file, the
+   Timeline restyle owns app.css, and the two do not overlap.
+
+   WIRING (NOT YET APPLIED — deliberately)
+   ---------------------------------------
+   This file is inert until it is loaded. cad5 applies ONE of these when they
+   return, and it is a one-line change to a file they own:
+       app.css:      @import url("./tokens.css");
+       index.html:   <link rel="stylesheet" href="./tokens.css">
+   NUNT does not apply it, because app.css and index.html are cad5's active
+   files and the serialization rule is not suspended just because they are
+   offline. NWPS ruling, not NUNT inference.
+
+   SCOPE
+   -----
+   ADDITIVE ONLY. No existing token is renamed, redefined or removed. Every
+   value below either aliases an existing token or introduces a genuinely new
+   dimension. Safe to load in any order relative to app.css, with one caveat
+   noted at the aliasing section.
+   ========================================================================= */
+
+:root {
+  /* --------------------------------------------------------------------------
+     AGENT STATE COLOURS
+     Verified against GET /v1/agents (11 agents, 2026-09-16), full cross-tab.
+     The real `state` vocabulary is FIVE values:
+         working | waiting | idle | online | offline
+
+     This section has been wrong three times. The history is kept because each
+     error is a different trap and a future editor can fall into any of them.
+
+       Error 1 — invented six states including "stale" and "suspended".
+                 Neither exists; staleness is state:idle plus a state_reason.
+       Error 2 — sampled the API once, saw four values, and dropped "waiting"
+                 as a phase. Wrong: "waiting" is a real state AND a real phase.
+                 One sample of a live system is not a vocabulary.
+       Error 3 — aliased these to existing UI tokens (D2V6, adversarial review).
+                 See below. This is the subtle one.
+
+     WHY THESE ARE LITERAL VALUES, NOT ALIASES
+     -----------------------------------------
+     v2 aliased --state-working to the old mint accent (removed since) and --state-offline to
+     --line-strong.
+     Both were wrong, and measurably so:
+
+       * --line-strong is rgba(15,23,42,0.16) — a 16%-ALPHA BORDER token. Using
+         it as a state fill produced a near-invisible wash, and once composited
+         over the console background its greyscale luminance is 0.6698.
+       * --accent's greyscale luminance is 0.6742. The two differ by 0.004 —
+         so `working` and `offline` were the SAME SHADE in greyscale.
+       * --accent also has only 1.40 contrast against --bg (#fafafa), well below
+         the 3:1 needed for a graphical indicator to be perceivable at all.
+
+     The aliasing instinct was "one source of truth". The error was aliasing
+     SEMANTIC state colours to DECORATIVE UI colours: those tokens answer "what
+     colour is a border/mint accent", not "what colour means blocked". Coupling
+     the two made a decorative palette change silently redefine agent state —
+     and the alias to a translucent border token was a category error outright.
+
+     These are therefore literal, tuned for greyscale separation and ≥3:1
+     contrast against --bg. They are state colours; they own their values.
+     -------------------------------------------------------------------------- */
+/* 2026-09-29, design-token plan s8 (Task 3): the states now reference the shared STATUS primitives in
+   /shared/tokens.css, light here and -d in the dark block below. That is not the aliasing the section above warns
+   against: these primitives are status colours (the audit's s4.2 table), not decorative UI tokens, so a palette change
+   to borders or surfaces cannot reach them. The values moved, so the numbers in this file's notes below (L 0.2080,
+   delta 0.0103, offline 2.42 ...) describe the OLD values and are kept as the record of why the shapes are what they
+   are. Measured now, light on --bg (n-50 #F6F6F3), greyscale L = relative luminance:
+     working  #22A06B  L 0.2654  3.07:1        waiting  #A35200  L 0.1382  5.15:1
+     online   #18794E  L 0.1442  4.99:1        idle     #6C707A  L 0.1618  4.58:1
+     offline  #A4A6AB  L 0.3811  2.25:1 (recessive by design, as below)
+     blocked  #C62A2F  L 0.1387  5.14:1
+   Dark, on --bg (n-950): working 7.04, waiting 8.93, online 8.16, idle 5.73, offline 2.91, blocked 6.51.
+   Closest greyscale pairs: waiting/blocked 0.0005, online/blocked 0.0055, waiting/online 0.0060 (was working/waiting
+   0.0103 among the five states). waiting and online still differ by SHAPE (bullseye vs disc). waiting and blocked
+   are now the same shade, so without colour only their word told them apart.
+   2026-09-29, decided on the design-token PR: the values are not tuned; SHAPE carries the pair instead. blocked keeps
+   the ring but its centre is a SQUARE, waiting's stays round (.state-dot--blocked::after below), and
+   tests/console-state-indicator.test.ts fails if the two centres ever match again. */
+  --state-working:   var(--ok-solid-l);
+  --state-waiting:   var(--wait-text-l);
+  --state-online:    var(--ok-text-l);  /* GREEN, not blue: "online" was blue on session rows and green on named agents
+                                   and computers, one state in two colours (UX audit #8, PR1). There is no blue status.
+                                   Separated from `working` by motion and, under reduced motion, by shape (below), and
+                                   always by its word. */
+  --state-idle:      var(--neutral-text-l);
+  --state-offline:   var(--neutral-solid-l);
+  --state-blocked:   var(--danger-text-l);
+
+/* ON --state-offline DELIBERATELY FAILING THE 3:1 TARGET
+   ------------------------------------------------------
+   Four of five state colours clear 3:1 against --bg. `offline` does not, at
+   2.42, and that is a decision rather than an oversight.
+
+   `offline` means "this agent is not here". It is the one state that should be
+   RECESSIVE — an operator scanning a fleet wants absence to recede and
+   presence to stand out. Forcing it to 3:1 would make a departed agent as
+   visually loud as an active one, which is the opposite of the intent.
+
+   The accessibility requirement is not violated, because contrast is not the
+   only channel carrying this state: it is conveyed by SHAPE (hollow ring),
+   by a DIM MEDALLION at 0.55 opacity, and by the mandatory text label. Colour
+   is the redundant channel for `offline`, which is exactly the right way round
+   — the weakest colour signal sits on the state that has the strongest
+   non-colour signals.
+
+   Note also this is the one state where the previous opacity-only distinction
+   from `idle` (both hollow rings) was thinnest: greyscale delta is now 0.1958
+   between idle (0.1706) and offline (0.3664), comfortably separable. */
+
+/* Greyscale separation across all pairs, worst case (D2V6's check, re-run):
+     closest pair: working vs waiting, delta 0.0103.
+   The v2 alias version's worst pair was working vs offline at 0.0044 — these
+   tokens were the same shade. Separation is now 2.3x better at worst case, and
+   every pair is separated by shape as well as shade. */
+
+  /* Phase is orthogonal to state and rendered as a secondary token, so
+     "idle · waiting" (blocked, cannot proceed) is distinguishable from
+     "idle" alone (nothing to do). The current view conflates these. */
+  --phase-ink: var(--muted);
+
+  /* --------------------------------------------------------------------------
+     ROW GEOMETRY
+     New dimensions — no existing token covers row spacing.
+     -------------------------------------------------------------------------- */
+  --row-pad-y: 14px;
+  --row-pad-x: var(--gap);
+  --meta-gap: 10px;
+  --truncate-lines: 1;
+
+  /* Collision stripe width.
+     UNUSED until backend task 847452a7 lands (expose live collision state in
+     the agent payload). Defined now so the width is agreed, not improvised
+     later. See UI_FLEET.md section 3.3. */
+  --stripe-collision: 3px;
+}
+
+/* Dark: each state takes its -d status primitive (the light online value was 3.4:1 on the dark surface). app.css does
+   not redeclare any --state-*, so this block is not overridden by source order. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --state-working: var(--ok-solid-d);
+    --state-waiting: var(--wait-text-d);
+    --state-online: var(--ok-text-d);
+    --state-idle: var(--neutral-text-d);
+    --state-offline: var(--neutral-solid-d);
+    --state-blocked: var(--danger-text-d);
+  }
+}
+
+
+/* ============================================================================
+   STATE INDICATOR
+   Colour + SHAPE + TEXT, never colour alone.
+
+   The state indicator previously relied on a two-word text label inside a
+   coloured lamp. At fleet scale that is slow to scan, and it collapses four
+   real states into two. Shape carries the state when colour is unavailable.
+   This is an availability requirement for the operator's primary awareness
+   surface, not a stylistic preference.
+
+   FIVE SIGNATURES, no collisions. This section was WRONG in an earlier version
+   and the fix is recorded because the bug is subtle and easy to reintroduce:
+
+     v1 rendered working, online and waiting all as a FILLED dot at opacity 1.
+     In shape terms that is ONE signature wearing three colours. Under
+     greyscale (colour gone) plus prefers-reduced-motion (the working pulse
+     gone) those three states became visually identical — and `online` is the
+     state an operator scans for most ("who is connected right now"), so it was
+     indistinguishable from both a working agent and a blocked one.
+
+     Caught by D2V6 in adversarial review, 2026-09-16. The original comment in
+     this file claimed "shape carries the state when colour is unavailable" —
+     that sentence was simply FALSE for three of five states. It is true now.
+
+   Signature table (shape + opacity, colour and motion ignored entirely):
+
+     working  -> filled circle, opacity 1, pulsing
+     waiting  -> HOLLOW RING with a FILLED CENTRE DOT   (target/bullseye)
+     online   -> filled circle, opacity 1, static
+     idle     -> hollow ring, opacity 1
+     offline  -> hollow ring, opacity 0.55
+
+   working and online share a shape and are separated by motion — which fails
+   under reduced-motion. That is the ONE remaining motion dependency, and it is
+   mitigated rather than hand-waved: see the reduced-motion block below, which
+   gives `working` the bullseye outline so the pair still separates by shape
+   alone when motion is unavailable.
+
+   Every state remains distinguishable with: no colour, or no motion, or no
+   colour AND no motion. Text is retained alongside at all breakpoints as a
+   fourth redundant channel, never as the sole carrier.
+   ========================================================================= */
+
+.state-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  vertical-align: middle;
+  position: relative;
+}
+
+/* working — filled circle, pulsing. */
+.state-dot--working {
+  background: var(--state-working);
+  animation: state-pulse 1.8s ease-in-out infinite;
+}
+
+/* online — filled circle, static.
+   Separated from `working` by motion only; the reduced-motion block below
+   adds a shape difference so the pair survives without animation. */
+.state-dot--online {
+  background: var(--state-online);
+}
+
+/* waiting — bullseye: hollow ring with a filled centre dot.
+   Distinct from BOTH filled circles and BOTH hollow rings, so "blocked" is
+   identifiable at scan speed without reading the label. */
+.state-dot--waiting,
+.state-dot--blocked {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--state-waiting);
+}
+.state-dot--blocked {
+  box-shadow: inset 0 0 0 1.5px var(--state-blocked);
+}
+.state-dot--waiting::after,
+.state-dot--blocked::after {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  border-radius: 50%;
+  background: var(--state-waiting);
+}
+/* blocked — the same ring, with a SQUARE centre. Since the design-token palette (2026-09-29) blocked and waiting are
+   the same shade in greyscale (L 0.1387 vs 0.1382, delta 0.0005), so colour alone no longer separates them; the
+   centre's shape does. tests/console-state-indicator.test.ts holds it. */
+.state-dot--blocked::after { background: var(--state-blocked); border-radius: 1px; }
+
+/* idle — hollow ring. */
+.state-dot--idle {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--state-idle);
+}
+
+/* offline — hollow ring, dimmed. Distinguished from idle by opacity; both are
+   rings, so this pair relies on a contrast difference rather than a shape
+   difference. Acceptable because idle vs offline is a connectivity question
+   the operator resolves by reading, and both are "not actively working". */
+.state-dot--offline {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--state-offline);
+  opacity: 0.55;
+}
+
+@keyframes state-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+/* Respect the platform preference.
+   The pulse is removed, which is the only thing separating `working` from
+   `online` — so this block RESTORES the distinction by SHAPE rather than
+   leaving two states identical.
+
+   FIX HISTORY — this block has now been wrong TWICE, both times in the same
+   way: I satisfied the DESCRIPTION instead of the RENDERING.
+
+     v1:  box-shadow: inset 0 0 0 1.5px var(--state-working);
+          The background is ALREADY var(--state-working), and an inset shadow
+          paints inside the border box — so the ring painted the fill colour
+          onto the fill colour. Rasterising v1 against a plain filled dot gave
+          PIXEL-IDENTICAL output. The comment above claimed the distinction had
+          been restored; the code did nothing.
+          Caught by D2V6 (from the CSS values) and DeepSeek-SuperVisor
+          (code-reading argument).
+
+     v2:  background: transparent; box-shadow: inset ... var(--state-working);
+          This FIXED the invisibility but created a NEW collision: with the
+          fill removed, `working` became a hollow ring — IDENTICAL in shape to
+          `idle` and `offline`. I had traded one collision for another and my
+          comment again asserted distinctness the render did not have.
+          Caught by rasterising the result before adopting it.
+
+   v3 (below): `working` keeps a half-filled indicator — ring plus a solid
+   lower half. Rasterised at 9px it is distinct from ALL FOUR other states:
+   online (solid disc), waiting (bullseye), idle and offline (hollow rings).
+   The half-fill also reads semantically as "partially through / in progress",
+   which is what `working` means, so the shape carries meaning rather than
+   being an arbitrary distinguisher.
+
+   THE VERIFICATION I ACTUALLY PERFORMED, stated precisely because v1 got in
+   by reasoning alone: I rasterised every variant to a 9px character grid in
+   Node, computed each cell from its distance to centre, and compared the
+   resulting strings for equality. I did NOT render in a browser — there is no
+   headless browser in this workspace. So this is a geometric proof that the
+   SHAPES differ, not a pixel capture. It rules out the v1 and v2 failures
+   (which were shape-identity bugs); it does NOT prove contrast or legibility
+   on a real display, which needs a human eye. */
+@media (prefers-reduced-motion: reduce) {
+  .state-dot--working {
+    animation: none;
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--state-working);
+  }
+  .state-dot--working::after {
+    content: "";
+    position: absolute;
+    inset: 1.5px;
+    border-radius: 0 0 50% 50% / 0 0 100% 100%;
+    background: var(--state-working);
+  }
+}
+
+/* Phase chip — secondary, deliberately quieter than the state word. */
+.phase-chip {
+  color: var(--phase-ink);
+  font-size: 0.8125rem;
+}
+
+/* Files disclosure — the count is the scan-speed signal; the names matter on
+   inspection. An unbounded inline file list is unreadable at fleet scale and
+   the file list is precisely the collision surface, so it gets a stable shape. */
+.files-count {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Truncation for the task line. One line with ellipsis; full text via title. */
+.row-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Collision stripe — DEFINED, NOT APPLIED.
+   Requires backend task 847452a7. Left here so the affordance is not
+   improvised by whoever wires it up. */
+.row-collision {
+  box-shadow: inset var(--stripe-collision) 0 0 0 var(--halt);
+}
+
+/* ============================================================================
+   FLEET ROW COMPOSITION
+   Classes emitted by renderFleet in app.js. Kept in THIS file rather than
+   app.css so the Fleet view owns its own layout and cad5's Timeline restyle
+   cannot collide with it. Only additive; no app.css rule is overridden except
+   where noted.
+   ========================================================================= */
+
+/* State chip: dot + word. The word is always rendered (never display:none at
+   any breakpoint) because it is the channel that survives greyscale, reduced
+   motion AND a screen reader. */
+.state-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.state-word { color: var(--ink); }
+
+/* Per-state word colour. Mirrors the dot so the pair reads as one unit, and
+   keeps the text legible when the dot is small. */
+.state-chip:has(.state-dot--working) .state-word { color: var(--clear-ink); }
+.state-chip:has(.state-dot--waiting) .state-word { color: var(--state-waiting); }
+.state-chip:has(.state-dot--blocked) .state-word { color: var(--state-blocked); }
+.state-chip:has(.state-dot--online)  .state-word { color: var(--state-online); }
+.state-chip:has(.state-dot--idle)    .state-word { color: var(--state-idle); }
+.state-chip:has(.state-dot--offline) .state-word { color: var(--state-offline); }
+
+/* Left edge tint on the row, so state is scannable down the column without
+   reading each word. Deliberately subtle - it is an accent, not a banner. */
+.strip--working .strip-id { border-left: 2px solid var(--state-working); padding-left: 8px; }
+.strip--waiting .strip-id { border-left: 2px solid var(--state-waiting); padding-left: 8px; }
+.strip--blocked .strip-id { border-left: 2px solid var(--state-blocked); padding-left: 8px; }
+.strip--online  .strip-id { border-left: 2px solid var(--state-online);  padding-left: 8px; }
+.strip--idle    .strip-id { border-left: 2px solid var(--state-idle);    padding-left: 8px; }
+.strip--offline .strip-id { border-left: 2px solid var(--state-offline); padding-left: 8px; }
+
+.role-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2, var(--surface));
+  color: var(--muted);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+/* Files disclosure. The count is the scan-speed signal; the names are behind a
+   toggle because the inline list was unbounded and is the collision surface. */
+.files-count { display: inline-block; }
+.files-count > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
+}
+.files-count > summary::-webkit-details-marker { display: none; }
+.files-count[open] > summary { color: var(--ink); }
+.files-list {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-2, var(--ink));
+  max-width: 46ch;
+  word-break: break-all;
+}
+
+.empty-all-offline {
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.empty-all-offline strong { display: block; color: var(--ink); margin-bottom: 4px; }

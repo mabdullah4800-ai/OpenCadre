@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # The full platform sweep also runs nightly and on demand, so a platform-only break is caught
+  # within a day even when no one pushes to main.
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  # Every pull request: Linux x64 (the hub) and Windows x64 (the client hooks). Windows-only defects
+  # shipped three times on 2026-09-25 (a PowerShell BOM on hook stdin, a /C:/ workspace root, hook
+  # output lost at exit) while CI ran on Linux alone, so Windows is not optional here.
+  test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # Every other platform a customer can run the CLI and hooks on. Not on pull requests: macOS
+  # minutes are billed at a multiple of Linux on a private repository, so these run on main, nightly
+  # and by hand (Actions tab -> CI -> Run workflow). Labels are GitHub's documented standard runners
+  # for private repositories (docs.github.com/en/actions/reference/runners/github-hosted-runners).
+  # 32-bit ARM Linux (armv7l) has no GitHub-hosted runner, so it is not covered here.
+  platforms:
+    name: platforms (${{ matrix.label }})
+    if: github.event_name != 'pull_request'
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # `platform` and `arch` are what the row CLAIMS; the "Platform under test" step fails the row
+        # when Node reports anything else, so an arm64 row cannot pass on x64 Node under emulation.
+        include:
+          - { label: "macOS arm64 (Apple Silicon)", os: macos-latest, node: 24, platform: darwin, arch: arm64, experimental: false }
+          - { label: "macOS x64 (Intel)", os: macos-15-intel, node: 24, platform: darwin, arch: x64, experimental: false }
+          - { label: "Linux arm64", os: ubuntu-24.04-arm, node: 24, platform: linux, arch: arm64, experimental: false }
+          - { label: "Windows arm64", os: windows-11-arm, node: 24, platform: win32, arch: arm64, experimental: false }
+          # Node 22, the oldest line still shipping every architecture here; customers' machines lag.
+          - { label: "Linux x64, Node 22", os: ubuntu-latest, node: 22, platform: linux, arch: x64, experimental: false }
+          - { label: "Windows x64, Node 22", os: windows-latest, node: 22, platform: win32, arch: x64, experimental: false }
+          # 32-bit Windows: Node 22 is the last line with a win-x86 build (Node 24 ships none), run on a
+          # 64-bit runner. Node reports it as `ia32`. Experimental until it has passed once: the hub's
+          # native dependency (better-sqlite3) may have no 32-bit prebuild.
+          - { label: "Windows x86 (32-bit), Node 22", os: windows-latest, node: 22, platform: win32, arch: x86, experimental: true }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          architecture: ${{ matrix.arch }}
+      # The row's claim, checked: fail unless Node itself reports the platform and architecture the row
+      # is named for (setup-node's `x86` is Node's `ia32`).
+      - name: Platform under test
+        env:
+          WANT_PLATFORM: ${{ matrix.platform }}
+          WANT_ARCH: ${{ matrix.arch }}
+        run: >-
+          node -e "const want = process.env.WANT_ARCH === 'x86' ? 'ia32' : process.env.WANT_ARCH;
+          console.log(process.platform, process.arch, process.version);
+          if (process.platform !== process.env.WANT_PLATFORM || process.arch !== want) {
+          console.error('expected ' + process.env.WANT_PLATFORM + '/' + want); process.exit(1) }"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t opencadre:ci .

@@ -1,0 +1,16 @@
+{
+  "mode": "notify",
+  "waitSeconds": 540,
+  "onTimeout": "deny",
+  "onHubUnreachable": "deny",
+  "useDefaultRules": true,
+  "useDefaultAllowlist": true,
+  "protectedBranches": ["main", "master", "production", "prod", "release"],
+  "disabledCategories": [],
+  "rules": [
+    { "category": "prisma-reset", "pattern": "\\bprisma\\s+migrate\\s+reset\\b", "risk": "high" }
+  ],
+  "allow": [
+    "^\\s*rm\\s+-rf\\s+\\./scratch/?\\s*$"
+  ]
+}

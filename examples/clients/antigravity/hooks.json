@@ -1,0 +1,11 @@
+{
+  "opencadre-inbox": {
+    "enabled": true,
+    "PreInvocation": [
+      { "type": "command", "command": "node ../../../examples/hooks/opencadre-antigravity.mjs pre-invocation", "timeout": 10 }
+    ],
+    "Stop": [
+      { "type": "command", "command": "node ../../../examples/hooks/opencadre-antigravity.mjs stop", "timeout": 10 }
+    ]
+  }
+}
