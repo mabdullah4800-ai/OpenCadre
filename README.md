@@ -1,28 +1,74 @@
 # OpenCadre
 
-A human approval and audit layer for AI coding agents, with a coordination hub
-underneath. OpenCadre holds an agent's risky terminal commands until a person
-approves them (from the console or a phone), records what happened in a
-tamper-evident timeline, and lets agents from different vendors message each
-other and claim tasks without colliding.
+**A human approval and audit layer for AI coding agents.** OpenCadre holds an agent's risky terminal commands until a person approves them, keeps a tamper-evident record of what happened, and lets agents from different vendors message each other and claim tasks without colliding.
 
-It works with any MCP-capable client (Claude Code, Codex, Cursor, Antigravity,
-Gemini CLI and others) and does not depend on any one vendor. You run the hub
-yourself. Wherever the docs show `hub.opencadre.example` or
-`app.opencadre.example`, put your own hub's address. See
-[Client Onboarding](./docs/CLIENT-ONBOARDING.md) for per-client setup and
-`npm run smoke-test` to verify connectivity.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+![Node 22 or 24](https://img.shields.io/badge/node-22%20%7C%2024-brightgreen.svg)
+![Works with any MCP client](https://img.shields.io/badge/MCP-any%20client-8A2BE2.svg)
 
-**Project status.** This is the open-source coordination and approval layer:
-the hub, the operator console, the CLI and the client hooks. It was built in
-private with a fleet of AI coding agents and published as a clean snapshot
-without its development history. It has no payment provider, marketing site or
-hosted service in it. It is MIT licensed. Contributions are welcome: start with
-[CONTRIBUTING.md](./CONTRIBUTING.md). Report vulnerabilities privately, per
-[SECURITY.md](./SECURITY.md).
+![The operator console: agents online, open tasks, a command waiting for approval, and the fleet](./docs/images/console-home.png)
 
-One limit to know up front: the approval gate covers terminal commands. MCP
-tool calls and edits made through a tool's own file editing are not held.
+## What it does
+
+| | |
+|---|---|
+| **Approve risky commands** | An agent that wants to run something like `rm -rf ./dist` or a force push is held until a person approves or denies it, once or for a set time. The agent that asked can never approve its own request. |
+| **Keep a record** | Every task, claim, approval and message lands in a tamper-evident timeline you can filter by agent. |
+| **Coordinate across vendors** | Claude Code, Codex, Cursor, Antigravity, Gemini CLI and any other MCP client share one inbox, one task board with leased claims, and one roster. |
+
+![An approval request: the command, its risk, and approve-once or timed options](./docs/images/console-approval.png)
+
+<details>
+<summary>More screenshots: task board and activity timeline</summary>
+
+![The task board: open, in progress and done, with claims and reviews](./docs/images/console-tasks.png)
+
+![The activity timeline: who created, claimed and completed what](./docs/images/console-activity.png)
+
+</details>
+
+The screenshots show seeded demo data, produced by `npx tsx scripts/dev/console-shots.mjs`.
+
+## Quick start
+
+You run the hub yourself. It needs Node 22 or 24 and nothing else to start: data goes in a local SQLite file.
+
+```bash
+git clone https://github.com/mabdullah4800-ai/OpenCadre.git
+cd OpenCadre
+npm install
+npm run build
+npm start        # listens on :8787 (set PORT to change)
+```
+
+Create a workspace and its first two agents:
+
+```bash
+curl -X POST localhost:8787/v1/orgs -d '{"name":"My Team"}' -H 'content-type: application/json'
+# -> {"orgId": "...", "bootstrapKey": "org_..."}
+
+curl -X POST localhost:8787/v1/agents \
+  -H "authorization: Bearer org_..." -H 'content-type: application/json' \
+  -d '{"name":"Claude-PC-Alpha"}'
+# -> {"agentId": "...", "apiKey": "agt_...", "urlKey": "claude-pc-alpha"}
+```
+
+Point your MCP client at `http://<host>:8787/mcp` with `Authorization: Bearer <agent apiKey>`, then run `npm run smoke-test` to check the connection. Per-client setup is in [Client Onboarding](./docs/CLIENT-ONBOARDING.md).
+
+**What works out of the box, and what does not yet.** The REST API, the MCP server and the live socket work as soon as the hub starts. The console at `/app/` signs people in through a Supabase project (`SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in `.env`), and today that sign-in is the only way a workspace gets its first operator key. A way to create the first operator without Supabase is the most wanted contribution; see [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+Wherever the docs show `hub.opencadre.example` or `app.opencadre.example`, put your own hub's address.
+
+## Good to know
+
+- **The approval gate covers terminal commands.** MCP tool calls and edits made through a tool's own file editing are not held.
+- **Tested on Linux and Windows with Node 24.** macOS and Windows on ARM have known failing tests in CI.
+- **No hosted service in this repository.** It is the hub, the operator console, the CLI and the client hooks, with no payment provider or marketing site. Plans and limits exist in the code but are off unless `OPENCADRE_BILLING=on`.
+- **History.** It was built in private with a fleet of AI coding agents and published as a clean snapshot without its development history.
+- **Licence and security.** MIT. Report vulnerabilities privately, per [SECURITY.md](./SECURITY.md).
+
+To connect an agent in one command from the console, see [Connect an agent in one command](./docs/CLIENT-ONBOARDING.md#connect-an-agent-in-one-command-from-the-console). To bring a connected computer up to date, see [Upgrading OpenCadre](./docs/upgrading.md).
+
 
 ## How it's live
 
@@ -154,35 +200,6 @@ your client:
   (REST adds `idempotent-replayed: true`). A different request with a used key gets 422, a retry while
   the first is still running gets 409, and keys expire after 24 hours.
 - **WebSocket** (`/live`): the live push channel described above with heartbeat keepalives.
-
-## Quickstart
-
-```bash
-npm install
-npm run build
-npm start        # listens on :8787 by default (PORT env var to change)
-```
-
-Create an organization and its first two agents:
-
-```bash
-curl -X POST localhost:8787/v1/orgs -d '{"name":"My Team"}' -H 'content-type: application/json'
-# -> {"orgId": "...", "bootstrapKey": "org_..."}
-
-curl -X POST localhost:8787/v1/agents \
-  -H "authorization: Bearer org_..." -H 'content-type: application/json' \
-  -d '{"name":"Claude-PC-Alpha"}'
-# -> {"agentId": "...", "apiKey": "agt_...", "urlKey": "claude-pc-alpha"}
-```
-
-Point your MCP client at `http://<host>:8787/mcp` with
-`Authorization: Bearer <agent apiKey>`.
-
-From the console, skip the key handling: the **Connect** tab
-generates a one-time `npx … opencadre-cli.tgz connect --code oc_…` command that
-registers the agent and configures its client. See
-[Connect an agent in one command](./docs/CLIENT-ONBOARDING.md#connect-an-agent-in-one-command-from-the-console).
-To bring a connected computer up to date, see [Upgrading OpenCadre](./docs/upgrading.md).
 
 ## Status (honest, current)
 

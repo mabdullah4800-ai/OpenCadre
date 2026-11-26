@@ -461,8 +461,8 @@ async function seedWorkspace(baseUrl, call, orgId) {
     method, headers: { "content-type": "application/json", authorization: `Bearer ${bot.apiKey}` }, body: JSON.stringify(body ?? {}),
   }).then((r) => r.json());
   // A replaced task (with a description, so its expanded card has something to show), made the oldest open card.
-  const old = await call("POST", "/v1/tasks", { title: "Draft the pricing page copy", description: "Monthly plans only. Keep it under 200 words and link the FAQ." });
-  await call("POST", `/v1/tasks/${old.task.id}/supersede`, { title: "Draft the pricing page copy, with annual plans" });
+  const old = await call("POST", "/v1/tasks", { title: "Draft the release notes", description: "Keep it under 200 words and link the upgrade guide." });
+  await call("POST", `/v1/tasks/${old.task.id}/supersede`, { title: "Draft the release notes, with upgrade steps" });
   db.prepare(`UPDATE tasks SET created_at = datetime('now', '-3 days') WHERE id = ?`).run(old.task.id);
   // A task nobody has touched for three weeks.
   const stale = await call("POST", "/v1/tasks", { title: "Audit the webhook retry policy" });
