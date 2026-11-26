@@ -124,6 +124,7 @@ const COVERED = new Set([
 /** Routes where cross-workspace isolation doesn't apply, with the reason. */
 const EXEMPT: Record<string, string> = {
   "POST /v1/orgs": "platform admin token creates a new workspace; reads no tenant data",
+  "POST /v1/admin/sign-in-links": "platform admin token mints a one-time sign-in ticket for an address; reads and writes no tenant data, and is refused while a sign-in provider is configured",
   "POST /v1/agents": "authenticated by the workspace's own bootstrap key; creates only in that workspace",
   "POST /v1/org/agents": "operator creates an agent in their own workspace; no workspace or resource id in the request",
   "POST /v1/connect-codes": "operator creates a code in their own workspace; no resource id in the request",
@@ -162,6 +163,7 @@ const EXEMPT: Record<string, string> = {
   "GET /v1/auth/start": "public; starts a sign-in, no tenant data",
   "POST /v1/auth/email": "public; sends a sign-in link, no tenant data",
   "GET /v1/auth/callback": "public; finishes a sign-in for the person the provider vouched for",
+  "GET /v1/auth/local": "public; finishes a sign-in for the address the hub admin issued a one-time ticket for; no tenant data",
   "POST /v1/auth/signout": "ends only the caller's own session",
   "GET /v1/auth/me": "lists only the signed-in person's own memberships (tests/accounts.test.ts)",
   "POST /v1/workspaces": "creates a new workspace; takes no workspace id",

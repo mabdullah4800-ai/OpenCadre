@@ -56,7 +56,6 @@ You will also see comments in the code that point at files that are not here: do
 
 ## Good places to start
 
-- **A first operator without Supabase.** Today a workspace gets its first operator key only when a person signs in through Supabase, so a hub started from the quick start has a working API and MCP server but nobody can sign in to the console. A safe way to create the first operator from the org bootstrap key (a route or a CLI command) would make self-hosting complete.
 - **macOS and Windows on ARM.** The extended CI matrix has failing tests on both. Reproducing and explaining them is useful even without a fix.
 - The two largest files, `public/app/app.js` and `src/rest.ts`, would benefit from being split into modules.
 - `src/db-postgres.ts` mirrors the schema, but the hub runs on SQLite only. Wiring Postgres in is open work.

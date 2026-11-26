@@ -70,6 +70,7 @@ import {
 } from "./oauth-authorize.js";
 import { renderAlreadyConnectedPage, renderConsentPage, renderOauthErrorPage, renderReturnPage, type PageChrome } from "./oauth-consent-page.js";
 import { authorizeUrl, enabledMethods, exchangeCode, newPkce, OAUTH_PROVIDERS, sendMagicLink, supabaseAuthConfig, type OAuthProvider } from "./supabase-auth.js";
+import { consumeLocalTicket, issueLocalTicket } from "./local-sign-in.js";
 import { onboardingProgress } from "./onboarding.js";
 import { can, roleFor, type Action } from "./permissions.js";
 import { deleteSubscription, listDevices, pushConfig, pushToPeople, saveSubscription } from "./push.js";
@@ -403,7 +404,8 @@ function createAgentOr4xx(res: Response, orgId: string, name: unknown, keyClass:
  * local behavior) and everything else is unavailable. */
 function requireAdmin({ openInDevelopment }: { openInDevelopment: boolean }) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const adminToken = process.env.OPENCADRE_ADMIN_TOKEN;
+    // Trimmed: a token that is only whitespace is a misconfiguration, and must read as "not set", never as a set token.
+    const adminToken = process.env.OPENCADRE_ADMIN_TOKEN?.trim();
     if (adminToken) {
       const given = Buffer.from(bearer(req) ?? "");
       const expected = Buffer.from(adminToken);
@@ -697,6 +699,35 @@ app.get("/v1/auth/callback", async (req, res) => {
     log.warn("sign-in callback failed", { error: (err as Error).message });
     fail("Sign-in didn't complete. Start again.");
   }
+});
+
+// --- Local sign-in: a hub with no sign-in provider (src/local-sign-in.ts) -----------------------------------------
+// The hub's admin mints a one-time link for an address; opening it signs that browser in as that person. Refused while
+// a sign-in provider is configured, so a hub that verifies people never mints a session for an unproven address.
+// `openInDevelopment: false`: unlike creating an organization, this is never open without the admin token.
+const LOCAL_SIGN_IN_REFUSED = "This hub signs people in through its sign-in provider, so local sign-in links are off.";
+app.post("/v1/admin/sign-in-links", requireAdmin({ openInDevelopment: false }), (req, res) => {
+  if (supabaseAuthConfig()) return res.status(409).json({ error: LOCAL_SIGN_IN_REFUSED });
+  const issued = issueLocalTicket({ email: req.body?.email, name: req.body?.name });
+  if (!issued.ok) return res.status(issued.status).json({ error: issued.error });
+  res.setHeader("Cache-Control", "no-store");
+  res.status(201).json({ url: `${publicAppUrl(req)}/v1/auth/local?ticket=${issued.ticket}`, expiresAt: issued.expiresAt });
+});
+
+// Spends the ticket and starts the session exactly as the provider callback does (upsertPerson, createSession,
+// startPersonSession). Every failure is the same redirect with the same message: it never says whether a ticket
+// existed, was used or expired.
+app.get("/v1/auth/local", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  const fail = () => res.redirect(302, `/app/?auth_error=${encodeURIComponent("That sign-in link is no longer valid. Ask for a new one.")}`);
+  if (supabaseAuthConfig()) return fail();
+  const identity = consumeLocalTicket(req.query.ticket);
+  if (!identity) return fail();
+  const person = upsertPerson(identity);
+  const { token } = createSession(person.id);
+  startPersonSession(req, res, token);
+  res.redirect(302, "/app/");
 });
 
 app.post("/v1/auth/signout", (req, res) => {

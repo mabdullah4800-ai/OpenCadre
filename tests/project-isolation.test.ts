@@ -613,6 +613,7 @@ const FOCUSED: Record<string, string> = {
 const EXEMPT: Record<string, string> = {
   "POST /v1/clearances/policy-pass": "records an event about the caller itself (actor and subject are the caller, stamped with its own project); names no other agent and reads nothing",
   "POST /v1/orgs": "platform admin creates a workspace",
+  "POST /v1/admin/sign-in-links": "platform admin mints a one-time sign-in ticket; no workspace",
   "POST /v1/agents": "bootstrap key creates a workspace-wide named agent",
   "POST /v1/org/agents": "operator (workspace-wide) manages agents",
   "POST /v1/org/agents/:agentId/rotate-key": "operator (workspace-wide) manages agents",
@@ -686,6 +687,7 @@ const EXEMPT: Record<string, string> = {
   "GET /v1/auth/start": "sign-in; no workspace",
   "POST /v1/auth/email": "sign-in; no workspace",
   "GET /v1/auth/callback": "sign-in; no workspace",
+  "GET /v1/auth/local": "sign-in; no workspace",
   "POST /v1/auth/signout": "sign-in; no workspace",
   "GET /v1/auth/me": "the person's own memberships",
   "POST /v1/workspaces": "creates a workspace",

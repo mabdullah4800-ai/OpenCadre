@@ -38,13 +38,30 @@ git clone https://github.com/mabdullah4800-ai/OpenCadre.git
 cd OpenCadre
 npm install
 npm run build
-npm start        # listens on :8787 (set PORT to change)
+
+export OPENCADRE_ADMIN_TOKEN=$(openssl rand -hex 32)   # the hub's root credential: keep it secret
+npm start                                              # listens on :8787 (set PORT to change)
 ```
 
-Create a workspace and its first two agents:
+Sign in to the console. With no sign-in provider configured, the hub's admin mints a one-time link:
 
 ```bash
-curl -X POST localhost:8787/v1/orgs -d '{"name":"My Team"}' -H 'content-type: application/json'
+curl -X POST localhost:8787/v1/admin/sign-in-links \
+  -H "authorization: Bearer $OPENCADRE_ADMIN_TOKEN" -H 'content-type: application/json' \
+  -d '{"email":"you@example.com","name":"Your Name"}'
+# -> {"url": "http://localhost:8787/v1/auth/local?ticket=...", "expiresAt": "..."}
+```
+
+Open that URL in your browser. It works once, for ten minutes. Name your workspace, then press **Get my command** on the home page: it prints the one command that connects a coding tool on this computer. Per-client details are in [Client Onboarding](./docs/CLIENT-ONBOARDING.md).
+
+That is the whole path: you are now the workspace's owner, so you can approve or deny what its agents ask to run.
+
+<details>
+<summary>Without the console: create a workspace and agents over the API</summary>
+
+```bash
+curl -X POST localhost:8787/v1/orgs -d '{"name":"My Team"}' \
+  -H "authorization: Bearer $OPENCADRE_ADMIN_TOKEN" -H 'content-type: application/json'
 # -> {"orgId": "...", "bootstrapKey": "org_..."}
 
 curl -X POST localhost:8787/v1/agents \
@@ -53,9 +70,11 @@ curl -X POST localhost:8787/v1/agents \
 # -> {"agentId": "...", "apiKey": "agt_...", "urlKey": "claude-pc-alpha"}
 ```
 
-Point your MCP client at `http://<host>:8787/mcp` with `Authorization: Bearer <agent apiKey>`, then run `npm run smoke-test` to check the connection. Per-client setup is in [Client Onboarding](./docs/CLIENT-ONBOARDING.md).
+Point your MCP client at `http://<host>:8787/mcp` with `Authorization: Bearer <agent apiKey>`, then run `npm run smoke-test` to check the connection. A workspace made this way has no person in it, so nobody can decide its approvals; use the console path for that.
 
-**What works out of the box, and what does not yet.** The REST API, the MCP server and the live socket work as soon as the hub starts. The console at `/app/` signs people in through a Supabase project (`SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in `.env`), and today that sign-in is the only way a workspace gets its first operator key. A way to create the first operator without Supabase is the most wanted contribution; see [CONTRIBUTING.md](./CONTRIBUTING.md).
+</details>
+
+**Sign-in on a shared or public hub.** Local sign-in links are for a hub you run for yourself or a small team: whoever holds the admin token can sign in as any address. For anything public, configure a sign-in provider (`SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`); the hub then verifies people through it and refuses local links. People who already signed in locally stay signed in, so the local owner can invite their provider account as an owner before signing out. Send a link privately and open it yourself: an app that previews links will use it up.
 
 Wherever the docs show `hub.opencadre.example` or `app.opencadre.example`, put your own hub's address.
 
